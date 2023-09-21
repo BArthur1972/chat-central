@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+require('./connection.js');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -7,8 +9,9 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
+app.use('/users', userRoutes);
 
-const server = require('https').createServer(app);
+const server = require('http').createServer(app);
 const PORT = 5001;
 
 // Create socket connection and pass in server instance and cors options to allow for cross-origin requests from client side
