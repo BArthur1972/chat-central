@@ -3,10 +3,11 @@ const User = require('../models/User');
 
 // Creating a new user
 router.post('/', async (req, res) => {
+    // TODO: Add picture to user
     try {
-        const { name, email, password, picture } = req.body;
+        const { name, email, password } = req.body;
         console.log(req.body);
-        const user = await User.create({ name, email, password, picture });
+        const user = await User.create({ name, email, password});
         res.status(201).json(user);
     } catch (e) {
         let msg;

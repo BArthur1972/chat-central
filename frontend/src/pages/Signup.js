@@ -2,18 +2,29 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import './styles/Signup.css';
+import {useSignupUserMutation} from "../services/appApi";
+import { useNavigate } from 'react-router-dom';
 
 function Signup() {
     // States for storing user data
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
+    const [signupUser, {isLoading, error}] = useSignupUserMutation();
+    const navigate = useNavigate();
 
     async function handleSignup(e) {
         e.preventDefault();
 
         // TODO: Sign up the user
+        signupUser({name, email, password}).then((data) => {
+            if (data) {
+                console.log(data);
+                navigate('/chat');
+            }
+        }).catch((err) => {
+            console.log(err);
+        });
     }
 
     return (
