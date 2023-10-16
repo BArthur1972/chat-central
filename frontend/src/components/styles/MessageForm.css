@@ -4,3 +4,10 @@
     overflow-y: scroll;
     margin-bottom: 20px;
 }
+
+.input-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}

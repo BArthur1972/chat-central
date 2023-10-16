@@ -17,14 +17,14 @@ function MessageForm() {
 				{!user && <div className='alert alert-danger'>Please Login</div>}
 			</div>
 			<Form onSubmit={handleSubmit}>
-				<Row>
+				<Row className='input-box d-flex justify-content-between'>
 					<Col md={11}>
 						<Form.Group>
 							<Form.Control type="text" placeholder="Your message" disabled={!user}></Form.Control>
 						</Form.Group>
 					</Col>
-					<Col md={1}>
-						<Button variant="primary" type="submit" style={{ width: "100%", backgroundColor: "orange" }} disabled={!user}>
+					<Col md={1} className="ml-1 send-btn">
+						<Button className='send-btn' variant="primary" type="submit" style={{ backgroundColor: "orange" }} disabled={!user}>
 							<i className="fas fa-paper-plane"></i>
 						</Button>
 					</Col>
