@@ -7,11 +7,6 @@ function Sidebar() {
     const user = useSelector((state) => state.user);
     const { socket, setMembers, members, setCurrentChannel, setChannels, privateMemberMessage, channels, setPrivateMemberMessage, currentChannel } = useContext(AppContext);
 
-    socket.off("new-user").on("new-user", (payload) => {
-        setMembers(payload);
-        console.log(payload);
-    });
-
     // get all channels
     useEffect(() => {
         if (user) {
@@ -25,8 +20,12 @@ function Sidebar() {
             socket.emit("new-user");
         }
 
-    }, [socket, user, setChannels, setCurrentChannel]);
+    }, []);
 
+    socket.off("new-user").on("new-user", (payload) => {
+        setMembers(payload);
+        console.log(payload);
+    });
 
     // If there is no user, do not render the sidebar
     if (!user) return <></>;
