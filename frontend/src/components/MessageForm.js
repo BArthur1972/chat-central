@@ -9,7 +9,6 @@ function MessageForm() {
 	const [message, setMessage] = useState("");
 	const user = useSelector((state) => state.user);
 	const { socket, currentChannel, setMessages, messages, privateMemberMessage } = useContext(AppContext);
-	const [placeholderMessages, setPlaceholderMessages] = useState([]);
 
 	function getFormattedDate() {
 		const date = new Date();
@@ -30,10 +29,8 @@ function MessageForm() {
 	useEffect(() => {
 		socket.off('channel-messages').on('channel-messages', (channelMessages) => {
 			setMessages(channelMessages);
-			// Update placeholderMessages with the new messages
-			setPlaceholderMessages(channelMessages);
 		});
-	}, [socket, setMessages, placeholderMessages]);
+	}, [socket, setMessages]);
 
 	function handleSubmit(e) {
 		e.preventDefault();
@@ -61,7 +58,7 @@ function MessageForm() {
 				{!user && <div className='alert alert-danger'>Please Login</div>}
 
 				{user &&
-					placeholderMessages.map(({ _id: date, messagesByDate }, idx) => (
+					messages.map(({ _id: date, messagesByDate }, idx) => (
 						<div key={idx}>
 							<p className="alert alert-info text-center message-date-indicator">{date}</p>
 							{messagesByDate?.map(({ content, time, from: sender }, msgIdx) => (

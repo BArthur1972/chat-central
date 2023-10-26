@@ -23,7 +23,7 @@ const server = require('http').createServer(app);
 const PORT = 5001;
 
 // Create socket connection and pass in server instance and cors options to allow for cross-origin requests from client side
-const socket = require('socket.io')(server, {
+const io = require('socket.io')(server, {
     cors: {
         origin: 'http://localhost:3000',
         methods: ['GET', 'POST']
@@ -57,7 +57,7 @@ function sortChannelMessagesByDate(messages) {
 }
 
 // Create a socket connection
-socket.on('connection', (socket) => {
+io.on('connection', (socket) => {
 
     // Let all users know when a new user joins
     socket.on('new-user', async () => {
@@ -79,12 +79,11 @@ socket.on('connection', (socket) => {
     // Post new message
 	// We need to use the socket to notify other users that there is a new message.
 	socket.on('message-channel', async (channel, content, sender, time, date) => {
-        console.log(`new message at ${channel}: ${content}`);
 		const newMessage = await Message.create({ content, from: sender, time, date, to: channel });
 		let channelMessages = await getLastMessagesFromChannel(channel);
 		channelMessages = sortChannelMessagesByDate(channelMessages);
 		// sending a message to a channel
-		socket.to(channel).emit('channel-messages', channelMessages);
+		io.to(channel).emit('channel-messages', channelMessages);
 
         // sending a notification to a channel
 		socket.broadcast.emit('notifications', channel);
