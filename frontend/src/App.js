@@ -14,13 +14,13 @@ function App() {
 	const [currentChannel, setCurrentChannel] = useState([]);
 	const [members, setMembers] = useState([]);
 	const [messages, setMessages] = useState([]);
-	const [privateMemberMessages, setPrivateMemberMessages] = useState([]);
+	const [privateMemberMessage, setPrivateMemberMessage] = useState([]);
 	const [newMessages, setNewMessages] = useState({});
 
 	const user = useSelector((state) => state.user);
 
 	return (
-		<AppContext.Provider value={{ socket, channels, setChannels, currentChannel, setCurrentChannel, members, setMembers, messages, setMessages, privateMemberMessages, setPrivateMemberMessages, newMessages, setNewMessages }}>
+		<AppContext.Provider value={{ socket, channels, setChannels, currentChannel, setCurrentChannel, members, setMembers, messages, setMessages, privateMemberMessage, setPrivateMemberMessage, newMessages, setNewMessages }}>
 			<BrowserRouter>
 				<Navigation />
 				<Routes>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form, Row, Col, Button } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../context/appContext';
 import './styles/MessageForm.css';
 
@@ -9,6 +9,7 @@ function MessageForm() {
 	const [message, setMessage] = useState("");
 	const user = useSelector((state) => state.user);
 	const { socket, currentChannel, setMessages, messages, privateMemberMessage } = useContext(AppContext);
+	const [placeholderMessages, setPlaceholderMessages] = useState([]);
 
 	function getFormattedDate() {
 		const date = new Date();
@@ -26,9 +27,13 @@ function MessageForm() {
 	const todayDate = getFormattedDate();
 
 	// Listen for messages from the server and update the state with the new messages
-	socket.off("channel-messages").on("channel-messages", (channelMessages) => {
-		setMessages(channelMessages);
-	});
+	useEffect(() => {
+		socket.off('channel-messages').on('channel-messages', (channelMessages) => {
+			setMessages(channelMessages);
+			// Update placeholderMessages with the new messages
+			setPlaceholderMessages(channelMessages);
+		});
+	}, [socket, setMessages, placeholderMessages]);
 
 	function handleSubmit(e) {
 		e.preventDefault();
@@ -54,6 +59,26 @@ function MessageForm() {
 		<>
 			<div className="messages-output">
 				{!user && <div className='alert alert-danger'>Please Login</div>}
+
+				{user &&
+					placeholderMessages.map(({ _id: date, messagesByDate }, idx) => (
+						<div key={idx}>
+							<p className="alert alert-info text-center message-date-indicator">{date}</p>
+							{messagesByDate?.map(({ content, time, from: sender }, msgIdx) => (
+								<div className={sender?.email === user?.email ? "message" : "incoming-message"} key={msgIdx}>
+									<div className="message-inner">
+										<div className="d-flex align-items-center mb-3">
+											{/* TODO: Add user profile picture */}
+											<p className="message-sender">{sender._id === user?._id ? "You" : sender.name}</p>
+										</div>
+										<p className="message-content">{content}</p>
+										{/* TODO: Add time for each message */}
+									</div>
+								</div>
+							))}
+						</div>
+					))}
+
 			</div>
 			<Form onSubmit={handleSubmit}>
 				<Row className='input-box'>

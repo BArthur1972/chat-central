@@ -11,6 +11,7 @@ function Navigation() {
 
 	async function handleLogout(e) {
 		e.preventDefault();
+
 		await logoutUser(user);
 
 		// Go back to login page
