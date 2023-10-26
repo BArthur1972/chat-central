@@ -20,7 +20,6 @@ function Login() {
         // TODO: Login user
         loginUser({ email, password }).then((data) => {
             if (data && !data.error) {
-                // TODO: Do socket stuff here
                 socket.emit('new-user');
                 // navigate to chat page
                 navigate('/chat');

@@ -12,14 +12,18 @@ const app = express();
 // Add middleware to parse incoming requests
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Add middleware to allow cross-origin requests from client side
 app.use(cors());
+
+// Add middleware to use userRoutes for all routes starting with /users
 app.use('/users', userRoutes);
 
 const server = require('http').createServer(app);
 const PORT = 5001;
 
 // Create socket connection and pass in server instance and cors options to allow for cross-origin requests from client side
-const socket = require('socket.io')(server, {
+const io = require('socket.io')(server, {
     cors: {
         origin: 'http://localhost:3000',
         methods: ['GET', 'POST']
@@ -28,10 +32,12 @@ const socket = require('socket.io')(server, {
 
 // get last messages from a channel
 async function getLastMessagesFromChannel(channel) {
+    // console.log(`getting last messages from ${channel}`);
     let channelMessages = await Message.aggregate([
         { $match: { to: channel } },
         { $group: { _id: '$date', messagesByDate: { $push: '$$ROOT' } } }
     ]);
+    // console.log(`last messages from ${channel}: `, channelMessages);
     return channelMessages;
 }
 
@@ -51,7 +57,7 @@ function sortChannelMessagesByDate(messages) {
 }
 
 // Create a socket connection
-socket.on('connection', (socket) => {
+io.on('connection', (socket) => {
 
     // Let all users know when a new user joins
     socket.on('new-user', async () => {
@@ -73,15 +79,31 @@ socket.on('connection', (socket) => {
     // Post new message
 	// We need to use the socket to notify other users that there is a new message.
 	socket.on('message-channel', async (channel, content, sender, time, date) => {
-        console.log('new message', content);
 		const newMessage = await Message.create({ content, from: sender, time, date, to: channel });
 		let channelMessages = await getLastMessagesFromChannel(channel);
 		channelMessages = sortChannelMessagesByDate(channelMessages);
 		// sending a message to a channel
-		socket.to(channel).emit('channel-messages', channelMessages);
+		io.to(channel).emit('channel-messages', channelMessages);
 
         // sending a notification to a channel
 		socket.broadcast.emit('notifications', channel);
+	});
+
+    // Log a user out of the app
+	app.delete('/logout', async (req, res) => {
+		try {
+			const { _id, newMessages } = req.body;
+			const user = await User.findById(_id);
+			user.status = "offline";
+			user.newMessages = newMessages;
+			await user.save();
+			const members = await User.find();
+			socket.broadcast.emit('new-user', members);
+			res.status(200).send();
+		} catch (e) {
+			console.log(e);
+			res.status(400).send();
+		}
 	});
 });
  
