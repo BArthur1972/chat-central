@@ -1,10 +1,12 @@
 import React, { useContext, useEffect } from 'react';
 import { ListGroup, Col, Row } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { AppContext } from '../context/appContext';
+import { addNotifications, resetNotifications } from '../features/userSlice';
 
 function Sidebar() {
     const user = useSelector((state) => state.user);
+    const dispatch = useDispatch();
     const { socket, setMembers, members, setCurrentChannel, setChannels, privateMemberMessage, channels, setPrivateMemberMessage, currentChannel } = useContext(AppContext);
 
     function joinChannel(channel, isPublic = true) {
@@ -18,8 +20,13 @@ function Sidebar() {
 			setPrivateMemberMessage(null);
 		}
 		
-        // TODO: dispatch for notifications
+        // dispatch for notifications
+		dispatch(resetNotifications(channel));
 	}
+
+	socket.off("notifications").on("notifications", (channel) => {
+		if (currentChannel !== channel) dispatch(addNotifications(channel));
+	});
 
     // get all channels
     useEffect(() => {
@@ -47,6 +54,7 @@ function Sidebar() {
     });
 
     function orderIds(id1, id2) {
+        // Order the ids so that the channel id is always the same for two users
 		if (id1 > id2) {
 			return id1 + "-" + id2;
 		} else {
@@ -69,7 +77,7 @@ function Sidebar() {
             <ListGroup>
                 {channels.map((channel, idx) => (
                     <ListGroup.Item key={idx} onClick={() => joinChannel(channel)} active={channel === currentChannel} style={{ cursor: "pointer", display: "flex", justifyContent: "space-between" }}>
-                        {channel} {channel !== currentChannel && (<span className="badge rounded-pill bg-primary"></span>)}
+                        {channel} {channel !== currentChannel && (<span className="badge rounded-pill bg-primary">{user.newMessages[channel]}</span>)}
                     </ListGroup.Item>
                 ))}
             </ListGroup>
@@ -85,7 +93,7 @@ function Sidebar() {
 							{member.status === "offline" ? " (Offline)" : " (Online)"}
 						</Col>
 						<Col xs={1}>
-							{/* TODO: Improve the online status. Use a small green cirle for online */}
+							<span className="badge rounded-pill bg-primary">{user.newMessages[orderIds(member._id, user._id)]}</span>
 						</Col>
 					</Row>
                     </ListGroup.Item>
