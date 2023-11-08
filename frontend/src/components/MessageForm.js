@@ -10,6 +10,13 @@ function MessageForm() {
 	const user = useSelector((state) => state.user);
 	const { socket, currentChannel, setMessages, messages, privateMemberMessage } = useContext(AppContext);
 
+	// Listen for messages from the server and update the state with the new messages
+	useEffect(() => {
+		socket.off('channel-messages').on('channel-messages', (channelMessages) => {
+			setMessages(channelMessages);
+		});
+	}, [socket, setMessages]);
+
 	function getFormattedDate() {
 		const date = new Date();
 		const year = date.getFullYear();
@@ -24,13 +31,6 @@ function MessageForm() {
 	}
 
 	const todayDate = getFormattedDate();
-
-	// Listen for messages from the server and update the state with the new messages
-	useEffect(() => {
-		socket.off('channel-messages').on('channel-messages', (channelMessages) => {
-			setMessages(channelMessages);
-		});
-	}, [socket, setMessages]);
 
 	function handleSubmit(e) {
 		e.preventDefault();
@@ -69,7 +69,7 @@ function MessageForm() {
 											<p className="message-sender">{sender._id === user?._id ? "You" : sender.name}</p>
 										</div>
 										<p className="message-content">{content}</p>
-										{/* TODO: Add time for each message */}
+										<p className="message-timestamp-left">{time}</p>
 									</div>
 								</div>
 							))}
