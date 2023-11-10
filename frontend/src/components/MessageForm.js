@@ -3,6 +3,7 @@ import { Form, Row, Col, Button } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../context/appContext';
+import ChatLabel from './ChatLabel';
 import './styles/MessageForm.css';
 
 function MessageForm() {
@@ -55,6 +56,8 @@ function MessageForm() {
 	return (
 		<>
 			<div className="messages-output">
+			{<ChatLabel userObject={user} privateMemberMsg={privateMemberMessage} currChannel={currentChannel} />}
+
 				{!user && <div className='alert alert-danger'>Please Login</div>}
 
 				{user &&
