@@ -67,9 +67,10 @@ io.on('connection', (socket) => {
     });
 
     // Listen for a user joining a channel
-    socket.on('join-channel', async (newChannel) => {
-        // Join the channel
+    socket.on('join-channel', async (newChannel, previousChannel) => {
+        // Join the new channel and leave the previous channel
         socket.join(newChannel);
+        socket.leave(previousChannel);
         let channelMessages = await getLastMessagesFromChannel(newChannel);
         channelMessages = sortChannelMessagesByDate(channelMessages);
         // Send the last messages to the user
