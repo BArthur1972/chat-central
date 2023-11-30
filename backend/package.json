@@ -19,5 +19,8 @@
     "nodemon": "^3.0.1",
     "socket.io": "^4.7.2",
     "validator": "^13.11.0"
+  },
+  "devDependencies": {
+    "@types/socket.io": "^3.0.2"
   }
 }
