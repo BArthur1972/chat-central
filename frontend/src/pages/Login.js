@@ -24,7 +24,6 @@ function Login() {
                 // navigate to chat page
                 navigate('/chat');
             }
-
             else {
                 alert("Login Failed. Check your username and/or password.");
                 console.log(data.error);

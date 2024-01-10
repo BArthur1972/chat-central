@@ -3,9 +3,11 @@ import { Container, Nav, Navbar, NavDropdown, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import logo from '../assets/logo.png';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { useLogoutUserMutation } from '../services/appApi';
 
 function Navigation() {
+	const navigate = useNavigate();
 	const user = useSelector((state) => state.user);
 	const [logoutUser] = useLogoutUserMutation();
 
@@ -15,7 +17,14 @@ function Navigation() {
 		await logoutUser(user);
 
 		// Go back to login page
-		window.location.replace("/");
+		navigate("/login", { replace: true });
+	}
+
+	function goToAccountSettings(e) {
+		e.preventDefault();
+
+		// Go to account settings page
+		navigate('/account');
 	}
 
 	return (
@@ -48,11 +57,7 @@ function Navigation() {
 									<span className="ms-2">{user.name}</span>
 								</>
 							} id="basic-nav-dropdown">
-								<NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-								<NavDropdown.Item href="#action/3.2">
-									Another action
-								</NavDropdown.Item>
-								<NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+								<NavDropdown.Item href="#action/3.1" onClick={goToAccountSettings}>My Account</NavDropdown.Item>
 								<NavDropdown.Divider />
 								<NavDropdown.Item href="#action/3.4">
 									<Button variant="danger" onClick={handleLogout}>Logout</Button>

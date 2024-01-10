@@ -99,6 +99,7 @@ io.on('connection', (socket) => {
 			user.newMessages = newMessages;
 			await user.save();
 			const members = await User.find();
+            // sending a notification to all users that a user has logged out of the app
 			socket.broadcast.emit('new-user', members);
 			res.status(200).send();
 		} catch (e) {
