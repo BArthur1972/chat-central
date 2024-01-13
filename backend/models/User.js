@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema({
     picture: {
         type: String,
         // Change later on when adding profile picture functionality
-        required: [false]
+        required: false
     },
     newMessages: {
         type: Object,
