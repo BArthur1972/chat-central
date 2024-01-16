@@ -21,7 +21,7 @@ function Account() {
 				<Col md={4} className='user_image_box'>
 					<img
 						alt=""
-						src={user.picture}
+						src={(user) !== null ? user.picture : "N/A"}
 						style={{ width: 240, height: 250, borderRadius: "50%", objectFit: "cover", marginTop: 30 }}
 					/>
 					<div className='change_profile_picture'>
