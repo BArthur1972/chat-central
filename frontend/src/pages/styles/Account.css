@@ -23,12 +23,6 @@
 	align-items: center;
 }
 
-.change_profile_picture_btn {
-	margin-top: 20px;
-	width: 50%;
-	
-}
-
 .user_info_box {
 	border: 1px solid #ccc;
 	display: flex;

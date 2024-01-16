@@ -71,6 +71,18 @@ router.put('/updatePassword/:id/:newPassword', async (req, res) => {
     }
 });
 
+// Update picture
+router.put('/updatePicture/:id/:newPicture', async (req, res) => {
+    const { id, newPicture } = req.params;
+    try {
+        const user = await User.findByIdAndUpdate(id, { picture: newPicture }, { new: true });
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+        console.log("Error: ", error.message);
+    }
+});
+
 // Delete account
 router.delete('/deleteAccount/:id', async (req, res) => {
     const id = req.params.id;

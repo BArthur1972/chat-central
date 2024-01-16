@@ -58,6 +58,15 @@ const appApi = createApi({
             }),
         }),
 
+        // Update picture
+        updatePicture: builder.mutation({
+            query: ({ id, newPicture }) => ({
+                url: `/users/updatePicture/${id}/${encodeURIComponent(newPicture)}`,
+                method: 'PUT',
+                body: { id, newPicture },
+            }),
+        }),
+
         // Delete account
         deleteAccount: builder.mutation({
             query: (id) => ({
@@ -74,6 +83,7 @@ export const {
     useLogoutUserMutation,
     useUpdateUsernameMutation,
     useUpdatePasswordMutation,
+    useUpdatePictureMutation,
     useDeleteAccountMutation,
     useGetUserByIdMutation, } = appApi;
 
