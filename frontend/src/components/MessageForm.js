@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form, Row, Col, Button } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
 import { AppContext } from '../context/appContext';
 import ChatLabel from './ChatLabel';
 import './styles/MessageForm.css';
@@ -10,6 +10,7 @@ function MessageForm() {
 	const [message, setMessage] = useState("");
 	const user = useSelector((state) => state.user);
 	const { socket, currentChannel, setMessages, messages, privateMemberMessage } = useContext(AppContext);
+	const messageEndRef = useRef(null);
 
 	// Listen for messages from the server and update the state with the new messages
 	useEffect(() => {
@@ -17,6 +18,15 @@ function MessageForm() {
 			setMessages(channelMessages);
 		});
 	}, [socket, setMessages]);
+
+	// Scroll to the bottom of the messages container when a new message is sent or received
+	useEffect(() => {
+		scrollToBottom();
+	}, [messages]);
+
+	function scrollToBottom() {
+		messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	}
 
 	function getFormattedDate() {
 		const date = new Date();
@@ -56,7 +66,7 @@ function MessageForm() {
 	return (
 		<>
 			<div className="messages-output">
-			{<ChatLabel userObject={user} privateMemberMsg={privateMemberMessage} currChannel={currentChannel} />}
+				{<ChatLabel userObject={user} privateMemberMsg={privateMemberMessage} currChannel={currentChannel} />}
 
 				{!user && <div className='alert alert-danger'>Please Login</div>}
 
@@ -78,7 +88,7 @@ function MessageForm() {
 							))}
 						</div>
 					))}
-
+				<div ref={messageEndRef} />
 			</div>
 			<Form onSubmit={handleSubmit}>
 				<Row className='input-box'>
