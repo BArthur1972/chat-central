@@ -61,7 +61,6 @@ function Signup() {
         e.preventDefault();
         
         const url = await uploadImage(image);
-        alert("Here is the user image", url);
 
         signupUser({ name, email, password, picture: url }).then((data) => {
             if (data) {
