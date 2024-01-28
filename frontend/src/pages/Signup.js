@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import './styles/Signup.css';
 import { useSignupUserMutation } from "../services/appApi";
 import { useNavigate } from 'react-router-dom';
-import placeholderImage from "../assets/profile_placeholder.jpg";
+import defaultProfilePic from "../assets/profile_placeholder.jpg";
 
 function Signup() {
     // States for storing user data
@@ -81,7 +81,7 @@ function Signup() {
                         <h1 className="text-center">Create An Account</h1>
                         <div className="signup-profile-pic__container">
                             <img
-                                src={imagePreview || placeholderImage}
+                                src={imagePreview || defaultProfilePic}
                                 className="signup-profile-pic"
                                 alt=""
                             />

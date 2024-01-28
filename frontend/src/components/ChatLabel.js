@@ -1,4 +1,6 @@
 import { React, useEffect, useState } from 'react';
+import './styles/ChatLabel.css';
+import defaultProfilePic from '../assets/profile_placeholder.jpg';
 
 function ChatLabel(props) {
     const user = props.userObject;
@@ -22,8 +24,8 @@ function ChatLabel(props) {
             {user && privateMemberMessage?._id && (
                 <>
                     <div className="alert alert-info conversation-info">
-                        <div>
-                            {/* TODO: Add images for private member messages (<img src={privateMemberMessage.picture} alt="" className="conversation-profile-pic" />) */}
+                        <div className='conversation-info-items'>
+                            <img src={privateMemberMessage.picture || defaultProfilePic} alt="" className="conversation-profile-pic" />
                             Your conversation with {privateMemberMessage.name}
                         </div>
                     </div>

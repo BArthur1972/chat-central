@@ -4,6 +4,7 @@ import { LinkContainer } from 'react-router-bootstrap';
 import logo from '../assets/logo.png';
 import { useSelector } from 'react-redux';
 import { useLogoutUserMutation } from '../services/appApi';
+import defaultProfilePic from '../assets/profile_placeholder.jpg';
 
 function Navigation() {
 	const user = useSelector((state) => state.user);
@@ -40,11 +41,11 @@ function Navigation() {
 						{user && (
 							<NavDropdown title={
 								<>
-									{/* <img
-										src={user.picture}
+									<img
+										src={user.picture || defaultProfilePic}
 										alt=""
 										style={{ width: 30, height: 30, marginRight: 10, borderRadius: "50%", objectFit: "cover" }}
-									/> */}
+									/>
 									<span className="ms-2">{user.name}</span>
 								</>
 							} id="basic-nav-dropdown">

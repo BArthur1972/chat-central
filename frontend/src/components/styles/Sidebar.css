@@ -1,0 +1,21 @@
+.member-status {
+    margin-bottom: 0;
+    position: relative;
+}
+
+.sidebar-header {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.image {
+    width: 16%;
+}
+
+.member-status-img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    border-radius: 50%;
+    object-fit: cover;
+}
