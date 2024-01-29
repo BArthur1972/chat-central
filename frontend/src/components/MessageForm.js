@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { useState, useContext, useEffect, useRef } from 'react';
 import { AppContext } from '../context/appContext';
 import ChatLabel from './ChatLabel';
+import defaultProfilePic from '../assets/profile_placeholder.jpg';
 import './styles/MessageForm.css';
 
 function MessageForm() {
@@ -78,7 +79,7 @@ function MessageForm() {
 								<div className={sender?.email === user?.email ? "message" : "incoming-message"} key={msgIdx}>
 									<div className="message-inner">
 										<div className="d-flex align-items-center mb-3">
-											{/* TODO: Add user profile picture */}
+											<img src={sender.picture || defaultProfilePic} alt="" style={{ width: 35, height: 35, objectFit: "cover", borderRadius: "50%", marginRight: 10 }} />
 											<p className="message-sender">{sender._id === user?._id ? "You" : sender.name}</p>
 										</div>
 										<p className="message-content">{content}</p>
