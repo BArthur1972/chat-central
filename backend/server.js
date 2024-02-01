@@ -95,9 +95,14 @@ io.on('connection', (socket) => {
 		try {
 			const { _id, newMessages } = req.body;
 			const user = await User.findById(_id);
+
+            // Set user status to offline and update the lastSeenDatetime and save the user
 			user.status = "offline";
+            user.lastSeenDatetime = Date.now();
 			user.newMessages = newMessages;
 			await user.save();
+         
+            // Get all users and send the updated list of members to all users
 			const members = await User.find();
 			socket.broadcast.emit('new-user', members);
 			res.status(200).send();

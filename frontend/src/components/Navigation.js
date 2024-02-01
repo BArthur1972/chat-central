@@ -5,6 +5,7 @@ import logo from '../assets/logo.png';
 import { useSelector } from 'react-redux';
 import { useLogoutUserMutation } from '../services/appApi';
 import defaultProfilePic from '../assets/profile_placeholder.jpg';
+import './styles/Navigation.css';
 
 function Navigation() {
 	const user = useSelector((state) => state.user);
@@ -41,10 +42,11 @@ function Navigation() {
 						{user && (
 							<NavDropdown title={
 								<>
+									{user.status === "online" ? <i className="fas fa-circle navigation-online-status"></i> : <i className="fas fa-circle navigation-offline-status"></i>}
 									<img
 										src={user.picture || defaultProfilePic}
 										alt=""
-										style={{ width: 30, height: 30, marginRight: 10, borderRadius: "50%", objectFit: "cover" }}
+										className='user-profile-image'
 									/>
 									<span className="ms-2">{user.name}</span>
 								</>

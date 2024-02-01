@@ -3,7 +3,6 @@ const User = require('../models/User');
 
 // Creating a new user
 router.post('/', async (req, res) => {
-    // TODO: Add picture to user
     try {
         const { name, email, password, picture } = req.body;
         console.log(req.body);
