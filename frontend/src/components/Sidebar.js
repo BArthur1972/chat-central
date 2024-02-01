@@ -66,6 +66,22 @@ function Sidebar() {
         joinChannel(channelId, false);
     }
 
+    function calculateLastSeen(lastSeen) {
+        const lastSeenDate = new Date(lastSeen);
+        const currentDate = new Date();
+        const diff = currentDate - lastSeenDate;
+        const minutes = Math.floor(diff / 60000);
+        if (minutes < 1) {
+            return "Just Now";
+        } else if (minutes < 60) {
+            return minutes + "m";
+        } else if (minutes < 1440) {
+            return Math.floor(minutes / 60) + "h";
+        } else {
+            return lastSeenDate.toLocaleString();
+        }
+    }
+
     // If there is no user, do not render the sidebar
     if (!user) return <></>;
 
@@ -86,13 +102,12 @@ function Sidebar() {
                         <Row>
                             <Col xs={2} className="member-status">
                                 <img src={member.picture || defaultProfilePic} alt="" className="member-status-img" />
-                                {/* TODO: Show online / Offline Status */}
+                                {member.status === "online" ? <i className="fas fa-circle sidebar-online-status"></i> : <i className="fas fa-circle sidebar-offline-status"></i>}
                             </Col>
                             <Col xs={9}>
                                 {member.name}
                                 {member._id === user?._id && " (You)"}
-                                {/* TODO: Improve this too*/}
-                                {member.status === "offline" ? " (Offline)" : " (Online)"}
+                                {member.status === "offline" && " (Offline) Last Seen: " + calculateLastSeen(member.lastSeenDatetime)}
                             </Col>
                             <Col xs={1}>
                                 <span className="badge rounded-pill bg-primary">{user.newMessages[orderIds(member._id, user._id)]}</span>

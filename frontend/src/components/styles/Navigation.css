@@ -1,0 +1,24 @@
+.user-profile-image {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    border-radius: 50%;
+    object-fit: "cover";
+}
+
+.navigation-online-status {
+    color: green;
+}
+
+.navigation-offline-status {
+    color: #e3b505;
+}
+
+.navigation-offline-status,
+.navigation-online-status {
+    font-size: 11px;
+    position: absolute;
+    z-index: 99;
+    bottom: 6px;
+    left: 9px;
+}

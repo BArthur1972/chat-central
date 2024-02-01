@@ -31,6 +31,10 @@ const UserSchema = new mongoose.Schema({
     status: {
         type: String,
         default: 'online'
+    },
+    lastSeenDatetime: {
+        type: Date,
+        default: Date.now(),
     }
 }, { minimize: false });
 
