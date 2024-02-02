@@ -78,7 +78,7 @@ function Sidebar() {
         } else if (minutes < 1440) {
             return Math.floor(minutes / 60) + "h";
         } else {
-            return lastSeenDate.toLocaleString();
+            return lastSeenDate.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true, month: 'short', day: 'numeric' });
         }
     }
 
