@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Chat from './pages/Chat';
+import Account from './pages/Account';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useState } from 'react';
@@ -32,6 +33,7 @@ function App() {
 						</>
 					)}
 					<Route path="/chat" element={<Chat />} />
+					<Route path="/account" element={<Account/>} />
 				</Routes>
 			</BrowserRouter>
 		</AppContext.Provider>
