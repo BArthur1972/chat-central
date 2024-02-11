@@ -11,6 +11,7 @@ function Signup() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [bio, setBio] = useState("");
     const [signupUser, { isLoading, error }] = useSignupUserMutation();
     const navigate = useNavigate();
 
@@ -62,7 +63,7 @@ function Signup() {
         
         const url = await uploadImage(image);
 
-        signupUser({ name, email, password, picture: url }).then((data) => {
+        signupUser({ name, email, password, picture: url, bio }).then((data) => {
             if (data) {
                 console.log(data);
                 navigate('/chat');
@@ -125,6 +126,17 @@ function Signup() {
                                 placeholder="Password"
                                 onChange={(e) => setPassword(e.target.value)}
                                 value={password}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="formBasicBio">
+                            <Form.Label>Bio</Form.Label>
+                            <Form.Control
+                                as={"textarea"}
+                                rows={3}
+                                placeholder="Optonal: Enter Your Bio"
+                                onChange={(e) => setBio(e.target.value)}
+                                value={bio}
                             />
                         </Form.Group>
 

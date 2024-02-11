@@ -21,7 +21,14 @@ const UserSchema = new mongoose.Schema({
     },
     picture: {
         type: String,
-        // Change later on when adding profile picture functionality
+        required: false
+    },
+    dateJoined: {
+        type: Date
+    },
+    bio: {
+        type: String,
+        default: 'Hey there! I am using ChatCentral',
         required: false
     },
     newMessages: {
