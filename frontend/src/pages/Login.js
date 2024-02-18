@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import "./styles/Login.css";
 import { useLoginUserMutation } from "../services/appApi";
@@ -61,7 +61,7 @@ function Login() {
                             />
                         </Form.Group>
                         <Button variant="primary" type="submit">
-                            Login
+                            {isLoading ? <Spinner animation="grow" /> : "Login"}
                         </Button>
                         <div className="py-4">
                             <p className="text-center">
