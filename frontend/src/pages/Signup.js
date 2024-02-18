@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import './styles/Signup.css';
 import { useSignupUserMutation } from "../services/appApi";
@@ -60,7 +60,7 @@ function Signup() {
 
     async function handleSignup(e) {
         e.preventDefault();
-        
+
         const url = await uploadImage(image);
 
         signupUser({ name, email, password, picture: url, bio }).then((data) => {
@@ -141,7 +141,7 @@ function Signup() {
                         </Form.Group>
 
                         <Button variant="primary" type="submit">
-                            Sign Up
+                            {isLoading ? <Spinner animation="grow" /> : "Sign Up"}
                         </Button>
                         <div className="py-4">
                             <p className="text-center">

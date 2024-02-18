@@ -14,7 +14,7 @@
 }
 
 .user_info {
-	padding : 20px;
+	padding: 20px;
 }
 
 .user_image_box {
@@ -38,18 +38,26 @@
 }
 
 .account_container {
-	height: 600px;
+	height: 660px;
 	margin-top: 50px;
 	margin-bottom: 50px;
 	border: 1px solid #ccc;
 }
 
-.user_name_box, .user_email_box, .user_bio_box, .user_password_box, .user_date_joined_box {
+.user_name_box,
+.user_email_box,
+.user_bio_box,
+.user_password_box,
+.user_date_joined_box {
 	display: flex;
 	flex-direction: row;
 }
 
-.user_name, .user_email, .user_bio, .user_date_joined, .user_password  {
+.user_name,
+.user_email,
+.user_bio,
+.user_date_joined,
+.user_password {
 	padding: 20px;
 	margin: 0px;
 }

@@ -2,6 +2,10 @@ import { Container, Row, Col, Button } from 'react-bootstrap';
 import './styles/Account.css';
 import { useSelector } from 'react-redux';
 import defaultProfilePic from '../assets/profile_placeholder.jpg';
+import EditUsernameModal from '../components/EditUsernameModal';
+import EditPasswordModal from '../components/EditPasswordModal';
+import EditBioModal from '../components/EditBioModal';
+import DeleteAccountModal from '../components/DeleteAccountModal';
 
 function Account() {
     const user = useSelector((state) => state.user);
@@ -32,21 +36,24 @@ function Account() {
                     <div className='user_info_box'>
                         <div className='user_name_box'>
                             <p className='user_name'>Username: {(user) !== null ? user.name : "N/A"}</p>
+                            <EditUsernameModal />
                         </div>
                         <div className='user_email_box'>
                             <p className='user_email'>Email: {(user) !== null ? user.email : "N/A"}</p>
                         </div>
                         <div className='user_bio_box'>
                             <p className='user_bio'>Bio: {(user) !== null ? user.bio : "N/A"}</p>
+                            <EditBioModal />
                         </div>
                         <div className='user_password_box'>
                             <p className='user_password'>Password: **********</p>
+                            <EditPasswordModal />
                         </div>
                         <div className='user_date_joined_box'>
                             <p className='user_date_joined'>Member since {(user) !== null ? getFormattedDateJoined(user.dateJoined) : "N/A"}</p>
                         </div>
                         <div className='delete_account'>
-                            <Button variant='danger' style={{ marginTop: 20, width: '40%', justifyContent: 'center' }}>Delete Account</Button>
+                            <DeleteAccountModal />
                         </div>
                     </div>
                 </Col>
