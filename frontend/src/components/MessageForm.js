@@ -6,11 +6,16 @@ import { AppContext } from '../context/appContext';
 import ChatLabel from './ChatLabel';
 import './styles/MessageForm.css';
 
+// MediaRecorder API for recording audio
+let mediaRecorder;
+
 function MessageForm() {
 	const [message, setMessage] = useState("");
 	const [selectedFile, setSelectedFile] = useState(null);
 	const [showFileUploadBox, setShowFileUploadBox] = useState(false);
 	const [uploadingFile, setUploadingFile] = useState(false);
+	const [recordingAudio, setRecordingAudio] = useState(false);
+	const [audioBlob, setAudioBlob] = useState(null);
 
 	const user = useSelector((state) => state.user);
 	const { socket, currentChannel, setMessages, messages, privateMemberMessage } = useContext(AppContext);
@@ -26,10 +31,47 @@ function MessageForm() {
 		}
 	}
 
+	const startRecording = () => {
+		setRecordingAudio(true);
+		navigator.mediaDevices.getUserMedia({ audio: true })
+			.then(stream => {
+				mediaRecorder = new MediaRecorder(stream);
+				mediaRecorder.start();
+
+				mediaRecorder.addEventListener("start", () => {
+					console.log("Recording started, mediaRecorder state: ", mediaRecorder.state);
+				});
+
+				const audioChunks = [];
+				mediaRecorder.addEventListener("dataavailable", event => {
+					audioChunks.push(event.data);
+				});
+
+				mediaRecorder.addEventListener("stop", () => {
+					console.log("Recording stopped, mediaRecorder state: ", mediaRecorder.state);
+					const audioBlob = new Blob(audioChunks, { type: "audio/wav" }); // Convert the audio chunks to a blob
+					setAudioBlob(audioBlob); 
+					setSelectedFile(audioBlob); // Set the audio blob as the selected file
+
+					stream.getTracks().forEach(track => track.stop()); // Stop the audio stream after recording
+
+				});
+			});
+	}
+
+	const stopRecording = () => {
+		mediaRecorder.stop();
+		setRecordingAudio(false);
+		setAudioBlob(null);
+		setSelectedFile(null);
+		alert("Recording is ready, Hit send.");
+	}
+
 	async function uploadFile() {
 		const data = new FormData();
 		data.append("file", selectedFile);
-		data.append("upload_preset", "chat_app_uploaded_image");
+		console.log("Selected file: ", selectedFile);
+		data.append("upload_preset", "chat_app_uploaded_file");
 
 		// Upload file to cloudinary using the cloudinary API
 		try {
@@ -77,7 +119,7 @@ function MessageForm() {
 	async function handleSubmit(e) {
 		e.preventDefault();
 
-		// Check if the message and imagePreview is empty, so we don't send empty messages to the server
+		// Check if the message and selectedFile and AudioBlob is empty, so we don't send empty messages to the server
 		if (!message && !selectedFile) {
 			return;
 		}
@@ -119,8 +161,7 @@ function MessageForm() {
 
 	// Check if the file url is an audio file
 	function isAudio(url) {
-		console.log(url.match(/\.(mp3|wav|ogg)$/) != null);
-		return url.match(/\.(mp3|wav|ogg)$/) != null;
+		return url.match(/\.(mp3|wav|ogg|webm)$/) != null;
 	}
 
 	return (
@@ -161,7 +202,7 @@ function MessageForm() {
 					<Row className='input-box'>
 						<Col md={10}>
 							<Form.Group>
-								<Form.Control type="text" placeholder="Your message" disabled={!user} value={message} onChange={(e) => setMessage(e.target.value)}></Form.Control>
+								<Form.Control id='text-box' type="text" placeholder="Your message" disabled={!user} value={message} onChange={(e) => setMessage(e.target.value)}></Form.Control>
 							</Form.Group>
 						</Col>
 						<Col md={1}>
@@ -171,7 +212,9 @@ function MessageForm() {
 						</Col>
 					</Row>
 				</Form>
-				<Button className="toggleMediaUploadBtn" variant="primary" type="submit" onClick={toggleFileUploadBox} style={{ backgroundColor: "grey" }} disabled={!user}> <i className="fas fa-photo-film"></i></Button>
+				<Button><i onClick={startRecording} disabled={!user} className={recordingAudio ? "fa-solid fa-microphone-lines fa-fade" : "fa-solid fa-microphone-lines"}></i></Button>
+				{recordingAudio && <Button onClick={stopRecording} style={{ backgroundColor: "red" }} disabled={!user}><i className="fa-solid fa-close"></i></Button>}
+				<Button className="toggleMediaUploadBtn" variant="primary" type="submit" onClick={toggleFileUploadBox} disabled={!user}> <i className={uploadingFile ? "fa-solid fa-cog fa-spin" : "fa-solid fa-photo-film"}></i></Button>
 				{showFileUploadBox && <Row className='media-upload'>
 					<Col>
 						<input type="file" disabled={!user} accept='image/png, image/jpeg, image/gif, audio/*' onChange={validateFile}></input>
