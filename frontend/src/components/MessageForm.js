@@ -89,11 +89,11 @@ function MessageForm() {
 
 		const roomId = currentChannel;
 		
-		if (!selectedFile) { // Send message to the server with image
+		if (!selectedFile) { // Send message to the server without an image
 			socket.emit("message-channel", roomId, message, user, time, todayDate);
 			
 
-		} else { // Send message to the server without image		
+		} else { // Send message to the server with image		
 			const imageUrl = await uploadImage();
 			console.log("Image url: ", imageUrl);
 			socket.emit("message-channel-image", roomId, message, user, time, todayDate, imageUrl);
