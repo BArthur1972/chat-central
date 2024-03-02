@@ -10,7 +10,7 @@ function MessageForm() {
 	const [message, setMessage] = useState("");
 	const [selectedFile, setSelectedFile] = useState(null);
 	const [showFileUploadBox, setShowFileUploadBox] = useState(false);
-	const [uploadingImage, setUploadingImage] = useState(false);
+	const [uploadingFile, setUploadingFile] = useState(false);
 
 	const user = useSelector((state) => state.user);
 	const { socket, currentChannel, setMessages, messages, privateMemberMessage } = useContext(AppContext);
@@ -18,22 +18,22 @@ function MessageForm() {
 	async function validateFile(e) {
 		const file = e.target.files[0];
 
-		// Check if image size is greater than 3mb
-		if (file.size > 3145728) {
-			return alert("Max file size is 3 MB");
+		// Check if file size is greater than 5mb
+		if (file.size > 5242880) {
+			return alert("Max file size is 5 MB");
 		} else {
 			setSelectedFile(file);
 		}
 	}
 
-	async function uploadImage() {
+	async function uploadFile() {
 		const data = new FormData();
 		data.append("file", selectedFile);
 		data.append("upload_preset", "chat_app_uploaded_image");
 
-		// Upload image to cloudinary api
+		// Upload file to cloudinary using the cloudinary API
 		try {
-			setUploadingImage(true);
+			setUploadingFile(true);
 			const cloudinary_cloud_name = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
 			let res = await fetch(
 				`https://api.cloudinary.com/v1_1/${cloudinary_cloud_name}/upload`,
@@ -44,10 +44,10 @@ function MessageForm() {
 			);
 
 			const urlData = await res.json();
-			setUploadingImage(false);
+			setUploadingFile(false);
 			return urlData.url;
 		} catch (e) {
-			setUploadingImage(false);
+			setUploadingFile(false);
 			console.log(e);
 		}
 	}
@@ -88,15 +88,14 @@ function MessageForm() {
 		const time = `${today.getHours()}:${minutes} ${unit}`;
 
 		const roomId = currentChannel;
-		
-		if (!selectedFile) { // Send message to the server without an image
-			socket.emit("message-channel", roomId, message, user, time, todayDate);
-			
 
-		} else { // Send message to the server with image		
-			const imageUrl = await uploadImage();
-			console.log("Image url: ", imageUrl);
-			socket.emit("message-channel-image", roomId, message, user, time, todayDate, imageUrl);
+		if (!selectedFile) { // Send message to the server without an file
+			socket.emit("message-channel", roomId, message, user, time, todayDate);
+
+		} else { // Send message to the server with file
+			const fileUrl = await uploadFile();
+			console.log("File url: ", fileUrl);
+			socket.emit("message-channel-file", roomId, message, user, time, todayDate, fileUrl);
 		}
 
 		// Reset the message input to an empty string
@@ -105,12 +104,23 @@ function MessageForm() {
 		setShowFileUploadBox(false);
 	}
 
-	const toggleMediaUploadBox = () => {
+	const toggleFileUploadBox = () => {
 		if (showFileUploadBox) {
 			setShowFileUploadBox(false);
 		} else {
 			setShowFileUploadBox(true);
 		}
+	}
+
+	// Check if the file url is an image file
+	function isImage(url) {
+		return url.match(/\.(jpeg|jpg|gif|png)$/) != null;
+	}
+
+	// Check if the file url is an audio file
+	function isAudio(url) {
+		console.log(url.match(/\.(mp3|wav|ogg)$/) != null);
+		return url.match(/\.(mp3|wav|ogg)$/) != null;
 	}
 
 	return (
@@ -131,7 +141,12 @@ function MessageForm() {
 											{/* TODO: Add user profile picture */}
 											<p className="message-sender">{sender._id === user?._id ? "You" : sender.name}</p>
 										</div>
-										{fileUrl && <img src={fileUrl} alt="message" className="message-image" />}
+										{fileUrl &&
+											<>
+												{isImage(fileUrl) && <img src={fileUrl} alt="message" className="message-image" />}
+												{isAudio(fileUrl) && <audio controls><source src={fileUrl} /></audio>}
+											</>
+										}
 										<p className="message-content">{content}</p>
 										<p className="message-timestamp-left">{time}</p>
 									</div>
@@ -156,10 +171,10 @@ function MessageForm() {
 						</Col>
 					</Row>
 				</Form>
-				<Button className="toggleMediaUploadBtn" variant="primary" type="submit" onClick={toggleMediaUploadBox} style={{ backgroundColor: "grey" }} disabled={!user}> <i className="fas fa-photo-film"></i></Button>
+				<Button className="toggleMediaUploadBtn" variant="primary" type="submit" onClick={toggleFileUploadBox} style={{ backgroundColor: "grey" }} disabled={!user}> <i className="fas fa-photo-film"></i></Button>
 				{showFileUploadBox && <Row className='media-upload'>
 					<Col>
-						<input type="file" disabled={!user} accept='image/png, image/jpeg' onChange={validateFile}></input>
+						<input type="file" disabled={!user} accept='image/png, image/jpeg, image/gif, audio/*' onChange={validateFile}></input>
 					</Col>
 				</Row>}
 			</div>

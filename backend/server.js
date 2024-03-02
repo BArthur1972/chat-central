@@ -90,8 +90,8 @@ io.on('connection', (socket) => {
 		socket.broadcast.emit('notifications', channel);
 	});
 
-    // Post new message with image
-    socket.on('message-channel-image', async (channel, content, sender, time, date, fileUrl) => {
+    // Post new message with file
+    socket.on('message-channel-file', async (channel, content, sender, time, date, fileUrl) => {
         const newMessage = await Message.create({ content, from: sender, time, date, to: channel, fileUrl });
         let channelMessages = await getLastMessagesFromChannel(channel);
         channelMessages = sortChannelMessagesByDate(channelMessages);
