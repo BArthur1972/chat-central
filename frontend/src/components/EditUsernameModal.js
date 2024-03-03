@@ -2,12 +2,16 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useUpdateUsernameMutation } from '../services/appApi';
 
 import React from 'react'
 
 function EditUsernameModal() {
     const [show, setShow] = useState(false);
     const [name, setName] = useState('');
+    const [updateUsername] = useUpdateUsernameMutation();
+    const user = useSelector((state) => state.user);
 
     // Modal functions to show and hide the Modal
     const handleClose = () => {
@@ -15,6 +19,23 @@ function EditUsernameModal() {
         setShow(false);
     };
     const handleShow = () => setShow(true);
+
+    // Update username
+    function handleSubmit(e) {
+        e.preventDefault();
+
+        updateUsername({ id: user._id, newName: name }).then((data) => {
+            if (data && !data.error) {
+                alert("Username updated successfully.");
+            }
+            else {
+                alert("Update Failed.");
+                console.log(data.error);
+            }
+        });
+        setName('');
+        setShow(false);
+    }
 
     return (
         <>
@@ -32,7 +53,7 @@ function EditUsernameModal() {
                 <Modal.Header closeButton>
                     <Modal.Title>Change Your Username</Modal.Title>
                 </Modal.Header>
-                <Form>
+                <Form onSubmit={handleSubmit}>
                     <Modal.Body>
                         <Form.Group className="mb-3">
                             <Form.Label htmlFor="exampleFormControlInput1" className="form-label-1">New Username</Form.Label>

@@ -35,7 +35,7 @@ function Signup() {
     async function uploadImage() {
         const data = new FormData();
         data.append("file", image);
-        data.append("upload_preset", "chat_app_uploaded_image");
+        data.append("upload_preset", "chat_app_uploaded_file");
 
         // Upload image to cloudinary api
         try {
@@ -134,7 +134,7 @@ function Signup() {
                             <Form.Control
                                 as={"textarea"}
                                 rows={3}
-                                placeholder="Optonal: Enter Your Bio"
+                                placeholder="Optional: Enter Your Bio"
                                 onChange={(e) => setBio(e.target.value)}
                                 value={bio}
                             />

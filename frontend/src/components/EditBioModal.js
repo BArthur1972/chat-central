@@ -2,19 +2,41 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useUpdateBioMutation } from '../services/appApi';
 
 import React from 'react'
 
 function EditBioModal() {
     const [show, setShow] = useState(false);
-    const [name, setName] = useState('');
+    const [bio, setBio] = useState('');
+    const [updateBio] = useUpdateBioMutation();
+    const user = useSelector((state) => state.user);
 
     // Modal functions to show and hide the Modal
     const handleClose = () => {
-        setName('');
+        setBio('');
         setShow(false);
     };
     const handleShow = () => setShow(true);
+
+    // Update bio
+    function handleSubmit(e) {
+        e.preventDefault();
+
+        updateBio({ id: user._id, newBio: bio }).then((data) => {
+            if (data && !data.error) {
+                alert("Bio updated successfully.");
+            }
+            else {
+                alert("Update Failed.");
+                console.log(data.error);
+            }
+        });
+
+        setBio('');
+        setShow(false);
+    }
 
     return (
         <>
@@ -32,11 +54,19 @@ function EditBioModal() {
                 <Modal.Header closeButton>
                     <Modal.Title>Change Your Bio</Modal.Title>
                 </Modal.Header>
-                <Form>
+                <Form onSubmit={handleSubmit}>
                     <Modal.Body>
                         <Form.Group className="mb-3">
                             <Form.Label htmlFor="exampleFormControlInput1" className="form-label-1">New Bio</Form.Label>
-                            <Form.Control type="username" className="form-control" id="exampleFormControlInput1" placeholder="Enter Your New Bio" onChange={(e) => { setName(e.target.value) }} value={name} />
+                            <Form.Control
+                                type="text"
+                                as={'textarea'}
+                                rows={3}
+                                className="form-control"
+                                id="exampleFormControlInput1"
+                                placeholder="Enter Your New Bio"
+                                onChange={(e) => { setBio(e.target.value) }}
+                                value={bio} />
                         </Form.Group>
                     </Modal.Body>
                     <Modal.Footer>

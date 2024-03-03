@@ -42,6 +42,30 @@ export const userSlice = createSlice({
                 return null;
             }
         );
+
+        // update user after updating username
+        builder.addMatcher(
+            appApi.endpoints.updateUsername.matchFulfilled,
+            (state, action) => {
+                return action.payload;
+            }
+        );
+
+        // update user after updating password
+        builder.addMatcher(
+            appApi.endpoints.updatePassword.matchFulfilled,
+            (state, action) => {
+                return action.payload;
+            }
+        );
+
+        // update user after updating bio
+        builder.addMatcher(
+            appApi.endpoints.updateBio.matchFulfilled,
+            (state, action) => {
+                return action.payload;
+            }
+        );
     }
 });
 
