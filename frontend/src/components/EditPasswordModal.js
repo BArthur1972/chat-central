@@ -2,13 +2,17 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useUpdatePasswordMutation } from '../services/appApi';
 
 import React from 'react'
 
 function EditPasswordModal() {
+    const user = useSelector((state) => state.user);
     const [show, setShow] = useState(false);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [updatePassword] = useUpdatePasswordMutation();
 
     // Modal functions to show and hide the Modal
     const handleClose = () => {
@@ -17,6 +21,32 @@ function EditPasswordModal() {
         setShow(false);
     }
     const handleShow = () => setShow(true);
+
+    // Update password
+    function handleSubmit(e) {
+        e.preventDefault();
+        if (password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return;
+        } else if (password.length < 6) {
+            alert("Password must be at least 6 characters long.");
+            return;
+        } else {
+            updatePassword({ id: user._id, newPassword: password }).then((data) => {
+                if (data && !data.error) {
+                    alert("Password updated successfully.");
+                }
+                else {
+                    alert("Password Update Failed.");
+                    console.log(data.error);
+                }
+            });
+        }
+
+        setPassword('');
+        setConfirmPassword('');
+        setShow(false);
+    }
 
     return (
         <>
@@ -34,7 +64,7 @@ function EditPasswordModal() {
                 <Modal.Header closeButton>
                     <Modal.Title>Change Your Password</Modal.Title>
                 </Modal.Header>
-                <Form>
+                <Form onSubmit={handleSubmit}>
                     <Modal.Body>
                         <Form.Group className="mb-3">
                             <Form.Label htmlFor="exampleFormControlInput1" className="form-label-1">New Password</Form.Label>
