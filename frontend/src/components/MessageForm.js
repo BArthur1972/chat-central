@@ -23,8 +23,10 @@ function MessageForm() {
 	async function validateFile(e) {
 		const file = e.target.files[0];
 
-		// Check if file size is greater than 5mb
-		if (file.size > 5242880) {
+		// Check if file size is greater than 35 MB
+		if (file.size > 36700160) {
+			// reset the file input
+			e.target.value = null;
 			return alert("Max file size is 5 MB");
 		} else {
 			setSelectedFile(file);
@@ -161,7 +163,12 @@ function MessageForm() {
 
 	// Check if the file url is an audio file
 	function isAudio(url) {
-		return url.match(/\.(mp3|wav|ogg|webm)$/) != null;
+		return url.match(/\.(mp3|wav|webm)$/) != null;
+	}
+
+	// Check if the file url is a video file
+	function isVideo(url) {
+		return url.match(/\.(mp4|avi|mov)$/) != null;
 	}
 
 	return (
@@ -186,6 +193,7 @@ function MessageForm() {
 											<>
 												{isImage(fileUrl) && <img src={fileUrl} alt="message" className="message-image" />}
 												{isAudio(fileUrl) && <audio controls><source src={fileUrl} /></audio>}
+												{isVideo(fileUrl) && <video style={{maxHeight:"300px", maxWidth:"400px"}} controls><source src={fileUrl} /></video>}
 											</>
 										}
 										<p className="message-content">{content}</p>
@@ -217,7 +225,7 @@ function MessageForm() {
 				<Button className="toggleMediaUploadBtn" variant="primary" type="submit" onClick={toggleFileUploadBox} disabled={!user}> <i className={uploadingFile ? "fa-solid fa-cog fa-spin" : "fa-solid fa-photo-film"}></i></Button>
 				{showFileUploadBox && <Row className='media-upload'>
 					<Col>
-						<input type="file" disabled={!user} accept='image/png, image/jpeg, image/gif, audio/*' onChange={validateFile}></input>
+						<input type="file" disabled={!user} accept='image/png, image/jpg image/jpeg, image/gif, audio/mp3, audio/webm, audio/wav, video/mp4, video/avi, video/mov' onChange={validateFile}></input>
 					</Col>
 				</Row>}
 			</div>
