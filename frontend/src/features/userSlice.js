@@ -66,6 +66,22 @@ export const userSlice = createSlice({
                 return action.payload;
             }
         );
+
+        // update user after updating picture
+        builder.addMatcher(
+            appApi.endpoints.updatePicture.matchFulfilled,
+            (state, action) => {
+                return action.payload;
+            }
+        );
+
+        // update user after deleting account
+        builder.addMatcher(
+            appApi.endpoints.deleteAccount.matchFulfilled,
+            () => {
+                return null;
+            }
+        );
     }
 });
 

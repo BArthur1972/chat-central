@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const User = require('../models/User');
+const Message = require('../models/Message');
 
 // Get user by id
 router.get('/getUserById/:id', async (req, res) => {
@@ -79,6 +80,34 @@ router.put('/updateBio/:id/:newBio', async (req, res) => {
         const user = await User.findByIdAndUpdate(id, { bio: newBio }, { new: true });
         res.status(200).json(user);
         console.log("User updated: ", user);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+        console.log("Error: ", error.message);
+    }
+});
+
+// Update picture
+router.put('/updatePicture/:id/:newPicture', async (req, res) => {
+    const { id, newPicture } = req.params;
+    try {
+        const user = await User.findByIdAndUpdate(id, { picture: newPicture }, { new: true });
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+        console.log("Error: ", error.message);
+    }
+});
+
+// Delete account
+router.delete('/deleteAccount/:id', async (req, res) => {
+    const id = req.params.id;
+    try {
+        const user = await User.findByIdAndDelete(id);
+
+        // Update the username in the messages
+        await Message.updateMany({ "from._id": id }, { "from.name": "Deleted Account" });
+
+        res.status(200).json(user);
     } catch (error) {
         res.status(400).json({ error: error.message });
         console.log("Error: ", error.message);
