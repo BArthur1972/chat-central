@@ -1,4 +1,4 @@
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 import './styles/Account.css';
 import { useSelector } from 'react-redux';
 import defaultProfilePic from '../assets/profile_placeholder.jpg';
@@ -6,6 +6,7 @@ import EditUsernameModal from '../components/EditUsernameModal';
 import EditPasswordModal from '../components/EditPasswordModal';
 import EditBioModal from '../components/EditBioModal';
 import DeleteAccountModal from '../components/DeleteAccountModal';
+import ChangeProfilePictureModal from '../components/ChangeProfilePictureModal';
 
 function Account() {
     const user = useSelector((state) => state.user);
@@ -30,7 +31,9 @@ function Account() {
                         src={user?.picture || defaultProfilePic}
                         style={{ width: 240, height: 250, borderRadius: "50%", objectFit: "cover", marginTop: 30 }}
                     />
-                    <Button className='change_profile_picture_btn'>Change Profile Picture</Button>
+                    <div className='change_profile_picture'>
+						<ChangeProfilePictureModal />
+					</div>
                 </Col>
                 <Col md={8}>
                     <div className='user_info_box'>

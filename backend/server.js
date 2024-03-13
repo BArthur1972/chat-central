@@ -104,6 +104,8 @@ io.on('connection', (socket) => {
          
             // Get all users and send the updated list of members to all users
 			const members = await User.find();
+            
+            // Send the updated list of members to all users
 			socket.broadcast.emit('new-user', members);
 			res.status(200).send();
 		} catch (e) {
