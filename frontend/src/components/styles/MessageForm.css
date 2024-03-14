@@ -65,3 +65,14 @@
     margin: 10px;
     max-width: 90%;
 }
+
+.selected-file-label {
+    display: flex;
+    justify-content: center;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+}
+
+.selected-files-text {
+    padding-top: 25px;
+}

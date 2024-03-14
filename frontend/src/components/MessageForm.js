@@ -5,6 +5,7 @@ import { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../context/appContext';
 import ChatLabel from './ChatLabel';
 import './styles/MessageForm.css';
+import FileUploadModal from './FileUploadModal';
 
 // MediaRecorder API for recording audio
 let mediaRecorder;
@@ -12,26 +13,12 @@ let mediaRecorder;
 function MessageForm() {
 	const [message, setMessage] = useState("");
 	const [selectedFile, setSelectedFile] = useState(null);
-	const [showFileUploadBox, setShowFileUploadBox] = useState(false);
 	const [uploadingFile, setUploadingFile] = useState(false);
 	const [recordingAudio, setRecordingAudio] = useState(false);
 	const [audioBlob, setAudioBlob] = useState(null);
 
 	const user = useSelector((state) => state.user);
 	const { socket, currentChannel, setMessages, messages, privateMemberMessage } = useContext(AppContext);
-
-	async function validateFile(e) {
-		const file = e.target.files[0];
-
-		// Check if file size is greater than 35 MB
-		if (file.size > 36700160) {
-			// reset the file input
-			e.target.value = null;
-			return alert("Max file size is 5 MB");
-		} else {
-			setSelectedFile(file);
-		}
-	}
 
 	const startRecording = () => {
 		setRecordingAudio(true);
@@ -52,7 +39,7 @@ function MessageForm() {
 				mediaRecorder.addEventListener("stop", () => {
 					console.log("Recording stopped, mediaRecorder state: ", mediaRecorder.state);
 					const audioBlob = new Blob(audioChunks, { type: "audio/wav" }); // Convert the audio chunks to a blob
-					setAudioBlob(audioBlob); 
+					setAudioBlob(audioBlob);
 					setSelectedFile(audioBlob); // Set the audio blob as the selected file
 
 					stream.getTracks().forEach(track => track.stop()); // Stop the audio stream after recording
@@ -121,7 +108,7 @@ function MessageForm() {
 	async function handleSubmit(e) {
 		e.preventDefault();
 
-		// Check if the message and selectedFile and AudioBlob is empty, so we don't send empty messages to the server
+		// Check if the message and selectedFile is empty, so we don't send empty messages to the server
 		if (!message && !selectedFile) {
 			return;
 		}
@@ -145,15 +132,6 @@ function MessageForm() {
 		// Reset the message input to an empty string
 		setMessage("");
 		setSelectedFile(null);
-		setShowFileUploadBox(false);
-	}
-
-	const toggleFileUploadBox = () => {
-		if (showFileUploadBox) {
-			setShowFileUploadBox(false);
-		} else {
-			setShowFileUploadBox(true);
-		}
 	}
 
 	// Check if the file url is an image file
@@ -191,9 +169,9 @@ function MessageForm() {
 										</div>
 										{fileUrl &&
 											<>
-												{isImage(fileUrl) && <img src={fileUrl} alt="message" className="message-image" />}
-												{isAudio(fileUrl) && <audio controls><source src={fileUrl} /></audio>}
-												{isVideo(fileUrl) && <video style={{maxHeight:"300px", maxWidth:"400px"}} controls><source src={fileUrl} /></video>}
+												{isImage(fileUrl) && <img src={fileUrl} style={{ maxHeight: "300px", maxWidth: "400px" }} alt="message" className="message-image" />}
+												{isAudio(fileUrl) && <audio className='message-audio' controls><source src={fileUrl} /></audio>}
+												{isVideo(fileUrl) && <video className='message-video' style={{ maxHeight: "300px", maxWidth: "400px" }} controls><source src={fileUrl} /></video>}
 											</>
 										}
 										<p className="message-content">{content}</p>
@@ -205,6 +183,11 @@ function MessageForm() {
 					))}
 
 			</div>
+			{selectedFile &&
+				<div className='selected-file-label'>
+					<p className='selected-files-text'>Selected file: {selectedFile.name || "Recorded " + selectedFile.type + " file"}</p>
+					<Button variant='danger' className='clear-selected-files-btn' onClick={() => setSelectedFile(null)} disabled={!selectedFile}>Clear</Button>
+				</div>}
 			<div className="input">
 				<Form onSubmit={handleSubmit} className='form'>
 					<Row className='input-box'>
@@ -220,14 +203,10 @@ function MessageForm() {
 						</Col>
 					</Row>
 				</Form>
-				<Button><i onClick={startRecording} disabled={!user} className={recordingAudio ? "fa-solid fa-microphone-lines fa-fade" : "fa-solid fa-microphone-lines"}></i></Button>
-				{recordingAudio && <Button onClick={stopRecording} style={{ backgroundColor: "red" }} disabled={!user}><i className="fa-solid fa-close"></i></Button>}
-				<Button className="toggleMediaUploadBtn" variant="primary" type="submit" onClick={toggleFileUploadBox} disabled={!user}> <i className={uploadingFile ? "fa-solid fa-cog fa-spin" : "fa-solid fa-photo-film"}></i></Button>
-				{showFileUploadBox && <Row className='media-upload'>
-					<Col>
-						<input type="file" disabled={!user} accept='image/png, image/jpg image/jpeg, image/gif, audio/mp3, audio/webm, audio/wav, video/mp4, video/avi, video/mov' onChange={validateFile}></input>
-					</Col>
-				</Row>}
+				<Button disabled={!user}><i onClick={startRecording} className={recordingAudio ? "fa-solid fa-microphone-lines fa-fade" : "fa-solid fa-microphone-lines"}></i></Button>
+				{recordingAudio &&
+					<Button onClick={stopRecording} style={{ backgroundColor: "red" }} disabled={!user}><i className="fa-solid fa-close"></i></Button>}
+				<FileUploadModal selectedMedia={selectedFile} setSelectedMedia={setSelectedFile} />
 			</div>
 		</>
 	);
