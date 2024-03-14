@@ -12,7 +12,7 @@ let mediaRecorder;
 
 function MessageForm() {
 	const [message, setMessage] = useState("");
-	const [selectedFile, setSelectedFile] = useState(null);
+	const [selectedFiles, setSelectedFiles] = useState([]);
 	const [uploadingFile, setUploadingFile] = useState(false);
 	const [recordingAudio, setRecordingAudio] = useState(false);
 	const [audioBlob, setAudioBlob] = useState(null);
@@ -40,10 +40,8 @@ function MessageForm() {
 					console.log("Recording stopped, mediaRecorder state: ", mediaRecorder.state);
 					const audioBlob = new Blob(audioChunks, { type: "audio/wav" }); // Convert the audio chunks to a blob
 					setAudioBlob(audioBlob);
-					setSelectedFile(audioBlob); // Set the audio blob as the selected file
-
+					setSelectedFiles(prevSelectedFiles => [...prevSelectedFiles, audioBlob]); // Add the audio blob to the selected files array
 					stream.getTracks().forEach(track => track.stop()); // Stop the audio stream after recording
-
 				});
 			});
 	}
@@ -52,37 +50,34 @@ function MessageForm() {
 		mediaRecorder.stop();
 		setRecordingAudio(false);
 		setAudioBlob(null);
-		setSelectedFile(null);
-		alert("Recording is ready, Hit send.");
 	}
 
-	async function uploadFile() {
-		const data = new FormData();
-		data.append("file", selectedFile);
-		console.log("Selected file: ", selectedFile);
-		data.append("upload_preset", "chat_app_uploaded_file");
+	async function uploadFiles() {
+		const uploadPromises = selectedFiles.map(file => {
+			const data = new FormData();
+			data.append("file", file);
+			data.append("upload_preset", "chat_app_uploaded_file");
 
-		// Upload file to cloudinary using the cloudinary API
-		try {
-			setUploadingFile(true);
+			// Upload file to cloudinary using the cloudinary API
 			const cloudinary_cloud_name = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
-			let res = await fetch(
+			return fetch(
 				`https://api.cloudinary.com/v1_1/${cloudinary_cloud_name}/upload`,
 				{
 					method: "post",
 					body: data,
-				}
-			);
+				}).then(res => res.json());
+		});
 
-			const urlData = await res.json();
+		try {
+			setUploadingFile(true);
+			const results = await Promise.all(uploadPromises);
 			setUploadingFile(false);
-			return urlData.url;
+			return results.map(result => result.url);
 		} catch (e) {
 			setUploadingFile(false);
 			console.log(e);
 		}
 	}
-
 	// Listen for messages from the server and update the state with the new messages
 	useEffect(() => {
 		socket.off('channel-messages').on('channel-messages', (channelMessages) => {
@@ -109,7 +104,7 @@ function MessageForm() {
 		e.preventDefault();
 
 		// Check if the message and selectedFile is empty, so we don't send empty messages to the server
-		if (!message && !selectedFile) {
+		if (!message && selectedFiles.length === 0) {
 			return;
 		}
 
@@ -120,18 +115,29 @@ function MessageForm() {
 
 		const roomId = currentChannel;
 
-		if (!selectedFile) { // Send message to the server without an file
+		if (selectedFiles.length === 0) { // Send message to the server without any files
 			socket.emit("message-channel", roomId, message, user, time, todayDate);
 
-		} else { // Send message to the server with file
-			const fileUrl = await uploadFile();
-			console.log("File url: ", fileUrl);
-			socket.emit("message-channel-file", roomId, message, user, time, todayDate, fileUrl);
+		} else if (message && selectedFiles.length > 1) { // Send message to the server with multiple files first then send the message
+			// Send the message to the server first
+			socket.emit("message-channel", roomId, message, user, time, todayDate);
+			const fileUrls = await uploadFiles();
+			// Then send the files
+			fileUrls.forEach(fileUrl => {
+				socket.emit("message-channel-file", roomId, "", user, time, todayDate, fileUrl);
+				console.log("File url: ", fileUrl);
+			});
+		} else { // If its a single file, send the message to the server with the file
+			const fileUrls = await uploadFiles();
+			fileUrls.forEach(fileUrl => {
+				socket.emit("message-channel-file", roomId, message, user, time, todayDate, fileUrl);
+				console.log("File url: ", fileUrl);
+			});
 		}
 
 		// Reset the message input to an empty string
 		setMessage("");
-		setSelectedFile(null);
+		setSelectedFiles([]);
 	}
 
 	// Check if the file url is an image file
@@ -183,11 +189,12 @@ function MessageForm() {
 					))}
 
 			</div>
-			{selectedFile &&
-				<div className='selected-file-label'>
-					<p className='selected-files-text'>Selected file: {selectedFile.name || "Recorded " + selectedFile.type + " file"}</p>
-					<Button variant='danger' className='clear-selected-files-btn' onClick={() => setSelectedFile(null)} disabled={!selectedFile}>Clear</Button>
-				</div>}
+			{selectedFiles.length > 0 &&
+				(<div className='selected-file-label'>
+					<p className='selected-files-text'>Selected file(s): {selectedFiles.map(file => file.name).join(', ') || "Recorded " + selectedFiles[0].type + " file"}</p>
+					<Button variant='danger' className='clear-selected-files-btn' onClick={() => setSelectedFiles([])} disabled={selectedFiles.length === 0}>Clear</Button>
+				</div>
+				)}
 			<div className="input">
 				<Form onSubmit={handleSubmit} className='form'>
 					<Row className='input-box'>
@@ -206,7 +213,7 @@ function MessageForm() {
 				<Button disabled={!user}><i onClick={startRecording} className={recordingAudio ? "fa-solid fa-microphone-lines fa-fade" : "fa-solid fa-microphone-lines"}></i></Button>
 				{recordingAudio &&
 					<Button onClick={stopRecording} style={{ backgroundColor: "red" }} disabled={!user}><i className="fa-solid fa-close"></i></Button>}
-				<FileUploadModal selectedMedia={selectedFile} setSelectedMedia={setSelectedFile} />
+				<FileUploadModal selectedMedia={selectedFiles} setSelectedMedia={setSelectedFiles} />
 			</div>
 		</>
 	);

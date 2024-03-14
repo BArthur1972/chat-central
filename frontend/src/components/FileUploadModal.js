@@ -8,30 +8,29 @@ function FileUploadModal(props) {
     const [show, setShow] = useState(false);
     const [uploadingFile, setUploadingFile] = useState(false);
 
-    // async function validateFile(e) {
-    //     setUploadingFile(true);
-    //     const file = e.target.files[0];
+    async function validateFiles(e) {
+        setUploadingFile(true);
+        const files = e.target.files;
+        const selectedFiles = [];
 
-    //     // Check if file size is greater than 35 MB
-    //     if (file.size > 36700160) {
-    //         // reset the file input
-    //         e.target.value = null;
-    //         setUploadingFile(false);
-    //         return alert("Max file size is 35 MB");
-    //     } else {
-    //         props.setSelectedMedia(file);
-    //         setUploadingFile(false);
-    //         console.log(file);
-    //     }
-    // }
-
-    async function validateFile(e) {
-        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file.size > 36700160) { // reset the file input if the file size is too large
+                e.target.value = null;
+                setUploadingFile(false);
+                return alert("Max file size is 35 MB");
+            } else {
+                selectedFiles.push(file);
+            }
+        }
+        props.setSelectedMedia(selectedFiles); // Set the selected files in the parent component (MessageForm)
+        setUploadingFile(false);
+        console.log(selectedFiles);
     }
 
     // Modal functions to show and hide the Modal
     const handleClose = () => {
-        props.setSelectedMedia(null);
+        props.setSelectedMedia([]);
         setShow(false);
     };
     const handleShow = () => setShow(true);
@@ -39,7 +38,7 @@ function FileUploadModal(props) {
     // Handle the form submission to upload
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!props.selectedMedia) {
+        if (props.selectedMedia.length === 0) {
             alert("Please select a file to upload");
         } else {
             setShow(false);
@@ -57,7 +56,7 @@ function FileUploadModal(props) {
                 keyboard={false}
             >
                 <Modal.Header>
-                    <Modal.Title>Upload Media File</Modal.Title>
+                    <Modal.Title>Select Media File(s)</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleSubmit}>
@@ -65,7 +64,7 @@ function FileUploadModal(props) {
                             <Form.Label>Upload File (Max. 35MB)</Form.Label>
                             <Form.Control
                                 type="file"
-                                onChange={validateFile}
+                                onChange={validateFiles}
                                 accept='image/png, image/jpg, image/jpeg, image/gif, audio/mp3, audio/webm, audio/wav, video/mp4, video/avi, video/mov'
                                 multiple
                             />
