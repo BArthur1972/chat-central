@@ -78,43 +78,55 @@ io.on('connection', (socket) => {
     });
 
     // Post new message
-	// We need to use the socket to notify other users that there is a new message.
-	socket.on('message-channel', async (channel, content, sender, time, date) => {
-		const newMessage = await Message.create({ content, from: sender, time, date, to: channel });
-		let channelMessages = await getLastMessagesFromChannel(channel);
-		channelMessages = sortChannelMessagesByDate(channelMessages);
-		// sending a message to a channel
-		io.to(channel).emit('channel-messages', channelMessages);
+    // We need to use the socket to notify other users that there is a new message.
+    socket.on('message-channel', async (channel, content, sender, time, date) => {
+        const newMessage = await Message.create({ content, from: sender, time, date, to: channel });
+        let channelMessages = await getLastMessagesFromChannel(channel);
+        channelMessages = sortChannelMessagesByDate(channelMessages);
+        // sending a message to a channel
+        io.to(channel).emit('channel-messages', channelMessages);
 
         // sending a notification to a channel
-		socket.broadcast.emit('notifications', channel);
-	});
+        socket.broadcast.emit('notifications', channel);
+    });
+
+    // Post new message with image
+    socket.on('message-channel-image', async (channel, content, sender, time, date, fileUrl) => {
+        const newMessage = await Message.create({ content, from: sender, time, date, to: channel, fileUrl });
+        let channelMessages = await getLastMessagesFromChannel(channel);
+        channelMessages = sortChannelMessagesByDate(channelMessages);
+        // sending a message to a channel
+        io.to(channel).emit('channel-messages', channelMessages);
+
+        // sending a notification to a channel
+        socket.broadcast.emit('notifications', channel);
+    });
 
     // Log a user out of the app
-	app.delete('/logout', async (req, res) => {
-		try {
-			const { _id, newMessages } = req.body;
-			const user = await User.findById(_id);
+    app.delete('/logout', async (req, res) => {
+        try {
+            const { _id, newMessages } = req.body;
+            const user = await User.findById(_id);
 
             // Set user status to offline and update the lastSeenDatetime and save the user
-			user.status = "offline";
+            user.status = "offline";
             user.lastSeenDatetime = Date.now();
-			user.newMessages = newMessages;
-			await user.save();
-         
+            user.newMessages = newMessages;
+            await user.save();
+
             // Get all users and send the updated list of members to all users
-			const members = await User.find();
-            
+            const members = await User.find();
+
             // Send the updated list of members to all users
-			socket.broadcast.emit('new-user', members);
-			res.status(200).send();
-		} catch (e) {
-			console.log(e);
-			res.status(400).send();
-		}
-	});
+            socket.broadcast.emit('new-user', members);
+            res.status(200).send();
+        } catch (e) {
+            console.log(e);
+            res.status(400).send();
+        }
+    });
 });
- 
+
 // get all channels
 app.get('/channels', (req, res) => {
     res.json(channels);
