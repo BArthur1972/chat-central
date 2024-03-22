@@ -63,7 +63,15 @@ function Signup() {
 
         const url = await uploadImage(image);
 
-        signupUser({ name, email, password, picture: url, bio }).then((data) => {
+        let newUser = {};
+
+        if (bio === "") {
+            newUser = { name, email, password, picture: url, bio: "Hey there! I am using ChatCentral" };
+        } else {
+            newUser = { name, email, password, picture: url, bio };
+        }
+
+        signupUser(newUser).then((data) => {
             if (data) {
                 console.log(data);
                 navigate('/chat');
