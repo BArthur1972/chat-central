@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppContext } from '../context/appContext';
 import { addNotifications, resetNotifications } from '../features/userSlice';
 import './styles/Sidebar.css';
-import defaultProfilePic from '../assets/profile_placeholder.jpg';
+import UserInfoModal from './UserInfoModal';
 
 function Sidebar() {
     const user = useSelector((state) => state.user);
@@ -101,7 +101,9 @@ function Sidebar() {
                     <ListGroup.Item key={idx} style={{ cursor: "pointer" }} active={privateMemberMessage?._id === member?._id} onClick={() => handlePrivateMemberMessage(member)} disabled={member._id === user._id}>
                         <Row>
                             <Col xs={2} className="member-status">
-                                <img src={member.picture || defaultProfilePic} alt="" className="member-status-img" />
+                                <div onClick={(e) => e.stopPropagation()}>
+                                    <UserInfoModal userObject={member} from={"Sidebar"} />
+                                </div>
                                 {member.status === "online" ? <i className="fas fa-circle sidebar-online-status"></i> : <i className="fas fa-circle sidebar-offline-status"></i>}
                             </Col>
                             <Col xs={9}>

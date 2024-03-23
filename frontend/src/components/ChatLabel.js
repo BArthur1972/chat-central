@@ -1,6 +1,6 @@
 import { React, useEffect, useState } from 'react';
 import './styles/ChatLabel.css';
-import defaultProfilePic from '../assets/profile_placeholder.jpg';
+import UserInfoModal from './UserInfoModal';
 
 function ChatLabel(props) {
     const user = props.userObject;
@@ -25,7 +25,7 @@ function ChatLabel(props) {
                 <>
                     <div className="alert alert-info conversation-info">
                         <div className='conversation-info-items'>
-                            <img src={privateMemberMessage.picture || defaultProfilePic} alt="" className="conversation-profile-pic" />
+                            <UserInfoModal userObject={privateMemberMessage} from={"ChatLabel"} />
                             Your conversation with {privateMemberMessage.name}
                         </div>
                     </div>

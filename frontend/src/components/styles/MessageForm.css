@@ -61,14 +61,6 @@
     margin: 0 auto;
 }
 
-.message-profile-image {
-    width: 35px;
-    height: 35px;
-    margin-right: 10px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
 .message-online-status {
     color: green;
 }
