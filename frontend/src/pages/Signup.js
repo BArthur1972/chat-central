@@ -73,11 +73,10 @@ function Signup() {
             newUser = { name, email, password, picture: url, bio };
         }
 
-        signupUser(newUser).then((data) => {
-            if (data) {
-                console.log(data);
+        signupUser(newUser).then((response) => {
+            if (response && response.data) {
                 // save token to local storage
-                localStorage.setItem('token', data.token);
+                localStorage.setItem('token', response.data.token);
 
                 // Notify other users that there is a new user
                 socket.emit('new-user');

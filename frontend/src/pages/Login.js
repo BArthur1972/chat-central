@@ -17,11 +17,11 @@ function Login() {
     async function handleLogin(e) {
         e.preventDefault();
 
-        // TODO: Login user
-        loginUser({ email, password }).then((data) => {
-            if (data && !data.error) {
+        loginUser({ email, password }).then((response) => {
+            console.log('Server response:', response);
+            if (response && response.data) {
                 // save token to local storage
-                localStorage.setItem('token', data.token);
+                localStorage.setItem('token', response.data.token);
     
                 // Notify other users that a new user has joined
                 socket.emit('new-user');
@@ -31,7 +31,7 @@ function Login() {
 
             else {
                 alert("Login Failed. Check your username and/or password.");
-                console.log(data.error);
+                console.log(response.error);
             }
         });
     }

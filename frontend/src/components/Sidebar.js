@@ -5,11 +5,13 @@ import { AppContext } from '../context/appContext';
 import { addNotifications, resetNotifications } from '../features/userSlice';
 import './styles/Sidebar.css';
 import defaultProfilePic from '../assets/profile_placeholder.jpg';
+import { useGetChannelsMutation } from '../services/appApi';
 
 function Sidebar() {
     const { user } = useSelector((state) => state.user);
     const dispatch = useDispatch();
     const { socket, setMembers, members, setCurrentChannel, setChannels, privateMemberMessage, channels, setPrivateMemberMessage, currentChannel } = useContext(AppContext);
+    const [getChannels] = useGetChannelsMutation();
 
     function joinChannel(channel, isPublic = true) {
         if (!user) {
@@ -33,9 +35,9 @@ function Sidebar() {
     // get all channels
     useEffect(() => {
         setCurrentChannel(currentChannel);
-        fetch("http://localhost:5001/channels")
-            .then((res) => res.json())
-            .then((data) => setChannels(data));
+        getChannels().then((res) => {
+            setChannels(res.data);
+        });
         socket.emit("join-channel", currentChannel);
         socket.emit("new-user");
     }, [user, socket, currentChannel, setCurrentChannel, setChannels]);

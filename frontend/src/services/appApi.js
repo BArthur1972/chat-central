@@ -91,6 +91,14 @@ const appApi = createApi({
                 method: 'DELETE',
             }),
         }),
+
+        // Get channels
+        getChannels: builder.mutation({
+            query: () => ({
+                url: '/channels',
+                method: 'GET',
+            }),
+        }),
     })
 });
 
@@ -103,6 +111,7 @@ export const {
     useUpdatePasswordMutation,
     useUpdateBioMutation,
     useUpdatePictureMutation,
-    useDeleteAccountMutation } = appApi;
+    useDeleteAccountMutation,
+    useGetChannelsMutation } = appApi;
 
 export default appApi;

@@ -57,8 +57,8 @@ function sortChannelMessagesByDate(messages) {
     });
 }
 
-// Create a socket connection
-io.on('connection', (socket) => {
+// Listen for socket connection events
+io.on('connection', (socket) => { 
 
     // Let all users know when a new user joins
     socket.on('new-user', async () => {
@@ -127,7 +127,7 @@ io.on('connection', (socket) => {
 });
 
 // get all channels
-app.get('/channels', (req, res) => {
+app.get('/channels', auth, (req, res) => {
     res.json(channels);
 });
 
