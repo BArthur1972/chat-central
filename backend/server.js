@@ -4,6 +4,7 @@ require('./connection.js');
 const userRoutes = require('./routes/userRoutes');
 const User = require('./models/User');
 const Message = require('./models/Message');
+const auth = require('./middleware/auth');
 
 const channels = ['General', 'Announcements', 'Career Opportunities', 'DSA for Technical Interviews', 'Interview Resources'];
 
@@ -103,15 +104,13 @@ io.on('connection', (socket) => {
     });
 
     // Log a user out of the app
-    app.delete('/logout', async (req, res) => {
+    app.delete('/logout', auth, async (req, res) => {
         try {
-            const { _id, newMessages } = req.body;
-            const user = await User.findById(_id);
-
-            // Set user status to offline and update the lastSeenDatetime and save the user
+            const user = req.user;
             user.status = "offline";
             user.lastSeenDatetime = Date.now();
-            user.newMessages = newMessages;
+            user.newMessages = req.body.newMessages;
+            await user.removeToken(req.token);
             await user.save();
 
             // Get all users and send the updated list of members to all users

@@ -20,8 +20,12 @@ function Login() {
         // TODO: Login user
         loginUser({ email, password }).then((data) => {
             if (data && !data.error) {
+                // save token to local storage
+                localStorage.setItem('token', data.token);
+    
+                // Notify other users that a new user has joined
                 socket.emit('new-user');
-                // navigate to chat page
+
                 navigate('/chat');
             }
 

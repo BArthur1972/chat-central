@@ -6,7 +6,7 @@ import { useUpdatePictureMutation } from '../services/appApi';
 import './styles/ChangeProfilePictureModal.css';
 
 function ChangeProfilePictureModal() {
-    const user = useSelector((state) => state.user);
+    const { user } = useSelector((state) => state.user);
     const [show, setShow] = useState(false);
 
     const [updatePicture] = useUpdatePictureMutation();

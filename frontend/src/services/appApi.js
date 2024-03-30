@@ -4,7 +4,16 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const appApi = createApi({
     reducerPath: 'appApi',
-    baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:5001' }),
+    baseQuery: fetchBaseQuery({ 
+        baseUrl: 'http://localhost:5001',
+        prepareHeaders: (headers, { getState }) => {
+            const user = getState().user;
+            if (user && user.token) {
+                headers.set('authorization', `Bearer ${user.token}`);
+            }
+            return headers;
+        },
+    }),
     endpoints: (builder) => ({
         // Create a new user
         signupUser: builder.mutation({

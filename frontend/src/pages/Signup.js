@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Container, Row, Col, Form, Button, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import './styles/Signup.css';
 import { useSignupUserMutation } from "../services/appApi";
 import { useNavigate } from 'react-router-dom';
 import defaultProfilePic from "../assets/profile_placeholder.jpg";
+import { AppContext } from '../context/appContext';
 
 function Signup() {
     // States for storing user data
@@ -14,6 +15,7 @@ function Signup() {
     const [bio, setBio] = useState("");
     const [signupUser, { isLoading, error }] = useSignupUserMutation();
     const navigate = useNavigate();
+    const { socket } = useContext(AppContext);
 
     // States for uploading and setting profile images
     const [image, setImage] = useState(null);
@@ -74,6 +76,12 @@ function Signup() {
         signupUser(newUser).then((data) => {
             if (data) {
                 console.log(data);
+                // save token to local storage
+                localStorage.setItem('token', data.token);
+
+                // Notify other users that there is a new user
+                socket.emit('new-user');
+
                 navigate('/chat');
             }
         }).catch((err) => {

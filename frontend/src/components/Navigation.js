@@ -10,13 +10,16 @@ import './styles/Navigation.css';
 
 function Navigation() {
 	const navigate = useNavigate();
-	const user = useSelector((state) => state.user);
+	const { user } = useSelector((state) => state.user);
 	const [logoutUser] = useLogoutUserMutation();
 
 	async function handleLogout(e) {
 		e.preventDefault();
 
 		await logoutUser(user);
+		
+		// Remove token from local storage
+		localStorage.removeItem('token');
 
 		// Go back to login page
 		navigate("/login", { replace: true });

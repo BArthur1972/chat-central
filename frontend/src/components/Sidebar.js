@@ -7,7 +7,7 @@ import './styles/Sidebar.css';
 import defaultProfilePic from '../assets/profile_placeholder.jpg';
 
 function Sidebar() {
-    const user = useSelector((state) => state.user);
+    const { user } = useSelector((state) => state.user);
     const dispatch = useDispatch();
     const { socket, setMembers, members, setCurrentChannel, setChannels, privateMemberMessage, channels, setPrivateMemberMessage, currentChannel } = useContext(AppContext);
 
@@ -91,7 +91,7 @@ function Sidebar() {
             <ListGroup>
                 {channels.map((channel, idx) => (
                     <ListGroup.Item key={idx} onClick={() => joinChannel(channel)} active={channel === currentChannel} style={{ cursor: "pointer", display: "flex", justifyContent: "space-between" }}>
-                        {channel} {channel !== currentChannel && (<span className="badge rounded-pill bg-primary">{user.newMessages[channel]}</span>)}
+                        {channel} {channel !== currentChannel && user.newMessages && user.newMessages[channel] && (<span className="badge rounded-pill bg-primary">{user.newMessages[channel]}</span>)}
                     </ListGroup.Item>
                 ))}
             </ListGroup>
@@ -110,7 +110,7 @@ function Sidebar() {
                                 {member.status === "offline" && " (Offline) Last Seen: " + calculateLastSeen(member.lastSeenDatetime)}
                             </Col>
                             <Col xs={1}>
-                                <span className="badge rounded-pill bg-primary">{user.newMessages[orderIds(member._id, user._id)]}</span>
+                                <span className="badge rounded-pill bg-primary">{user.newMessages && user.newMessages[orderIds(member._id, user._id)]}</span>
                             </Col>
                         </Row>
                     </ListGroup.Item>

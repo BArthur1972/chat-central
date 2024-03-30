@@ -11,7 +11,7 @@ function EditBioModal() {
     const [show, setShow] = useState(false);
     const [bio, setBio] = useState('');
     const [updateBio] = useUpdateBioMutation();
-    const user = useSelector((state) => state.user);
+    const { user } = useSelector((state) => state.user);
 
     // Modal functions to show and hide the Modal
     const handleClose = () => {

@@ -8,7 +8,7 @@ import defaultProfilePic from '../assets/profile_placeholder.jpg';
 import './styles/MessageForm.css';
 
 function MessageForm() {
-	const user = useSelector((state) => state.user);
+	const { user } = useSelector((state) => state.user);
 	const { socket, currentChannel, setMessages, messages, privateMemberMessage } = useContext(AppContext);
 	const messageEndRef = useRef(null);
 
