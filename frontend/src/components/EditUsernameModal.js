@@ -11,7 +11,7 @@ function EditUsernameModal() {
     const [show, setShow] = useState(false);
     const [name, setName] = useState('');
     const [updateUsername] = useUpdateUsernameMutation();
-    const user = useSelector((state) => state.user);
+    const { user } = useSelector((state) => state.user);
 
     // Modal functions to show and hide the Modal
     const handleClose = () => {

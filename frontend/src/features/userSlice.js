@@ -4,17 +4,22 @@ import appApi from "../services/appApi";
 // userSlice is a reducer that will be used to store and update the user data in the Redux store.
 export const userSlice = createSlice({
     name: 'user',
-    initialState: null,
+    initialState: {
+        user: null,
+        token: null
+    },
     reducers: {
         addNotifications: (state, { payload }) => {
-            if (state.newMessages[payload]) {
-                state.newMessages[payload] = state.newMessages[payload] + 1;
+            if (state.user.newMessages[payload]) {
+                state.user.newMessages[payload] = state.user.newMessages[payload] + 1;
             } else {
-                state.newMessages[payload] = 1;
+                state.user.newMessages[payload] = 1;
             }
         },
         resetNotifications: (state, { payload }) => {
-            delete state.newMessages[payload];
+            if (state.user) {
+                delete state.user.newMessages[payload];
+            }
         },
     },
 
@@ -23,7 +28,8 @@ export const userSlice = createSlice({
         builder.addMatcher(
             appApi.endpoints.signupUser.matchFulfilled,
             (state, action) => {
-                return action.payload;
+                state.user = action.payload.user;
+                state.token = action.payload.token;
             }
         );
 
@@ -31,15 +37,17 @@ export const userSlice = createSlice({
         builder.addMatcher(
             appApi.endpoints.loginUser.matchFulfilled,
             (state, action) => {
-                return action.payload;
+                state.user = action.payload.user;
+                state.token = action.payload.token;
             }
         );
 
         // destroy session after logout
         builder.addMatcher(
             appApi.endpoints.logoutUser.matchFulfilled,
-            () => {
-                return null;
+            (state) => {
+                state.user = null;
+                state.token = null;
             }
         );
 
@@ -47,7 +55,7 @@ export const userSlice = createSlice({
         builder.addMatcher(
             appApi.endpoints.updateUsername.matchFulfilled,
             (state, action) => {
-                return action.payload;
+                state.user = action.payload;
             }
         );
 
@@ -55,7 +63,7 @@ export const userSlice = createSlice({
         builder.addMatcher(
             appApi.endpoints.updatePassword.matchFulfilled,
             (state, action) => {
-                return action.payload;
+                state.user = action.payload;
             }
         );
 
@@ -63,7 +71,7 @@ export const userSlice = createSlice({
         builder.addMatcher(
             appApi.endpoints.updateBio.matchFulfilled,
             (state, action) => {
-                return action.payload;
+                state.user = action.payload;
             }
         );
 
@@ -71,15 +79,16 @@ export const userSlice = createSlice({
         builder.addMatcher(
             appApi.endpoints.updatePicture.matchFulfilled,
             (state, action) => {
-                return action.payload;
+                state.user = action.payload;
             }
         );
 
-        // update user after deleting account
+        // destroy user and token after deleting account
         builder.addMatcher(
             appApi.endpoints.deleteAccount.matchFulfilled,
-            () => {
-                return null;
+            (state) => {
+                state.user = null;
+                state.token = null;
             }
         );
     }

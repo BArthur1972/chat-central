@@ -8,7 +8,7 @@ import { useUpdatePasswordMutation } from '../services/appApi';
 import React from 'react'
 
 function EditPasswordModal() {
-    const user = useSelector((state) => state.user);
+    const { user } = useSelector((state) => state.user);
     const [show, setShow] = useState(false);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');

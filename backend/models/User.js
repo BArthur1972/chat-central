@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const { isEmail } = require('validator');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const UserSchema = new mongoose.Schema({
     name: {
@@ -41,7 +42,13 @@ const UserSchema = new mongoose.Schema({
     lastSeenDatetime: {
         type: Date,
         default: Date.now(),
-    }
+    },
+    tokens: [{
+        token: {
+            type: String,
+            required: true
+        }
+    }]
 }, { minimize: false });
 
 
@@ -88,6 +95,22 @@ UserSchema.statics.findByCredentials = async function (email, password) {
     }
 
     return user;
+};
+
+// Generate an auth token
+UserSchema.methods.generateAuthToken = async function () {
+    const user = this;
+    const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET );
+    user.tokens = user.tokens.concat({ token });
+    await user.save();
+    return token;
+};
+
+// Remove token
+UserSchema.methods.removeToken = async function (token) {
+    const user = this;
+    user.tokens = user.tokens.filter((t) => t.token !== token);
+    await user.save();
 };
 
 const User = mongoose.model('User', UserSchema);

@@ -17,17 +17,17 @@ function Login() {
     async function handleLogin(e) {
         e.preventDefault();
 
-        // TODO: Login user
-        loginUser({ email, password }).then((data) => {
-            if (data && !data.error) {
-                socket.emit('new-user');
-                // navigate to chat page
+        loginUser({ email, password }).then((response) => {
+            if (response && response.data) {
+                localStorage.setItem('token', response.data.token);
+    
+                socket.emit('new-user'); // Notify other users that a new user has joined
                 navigate('/chat');
             }
 
             else {
                 alert("Login Failed. Check your username and/or password.");
-                console.log(data.error);
+                console.log(response.error);
             }
         });
     }
