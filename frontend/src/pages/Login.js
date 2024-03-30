@@ -18,14 +18,10 @@ function Login() {
         e.preventDefault();
 
         loginUser({ email, password }).then((response) => {
-            console.log('Server response:', response);
             if (response && response.data) {
-                // save token to local storage
                 localStorage.setItem('token', response.data.token);
     
-                // Notify other users that a new user has joined
-                socket.emit('new-user');
-
+                socket.emit('new-user'); // Notify other users that a new user has joined
                 navigate('/chat');
             }
 

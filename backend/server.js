@@ -127,7 +127,7 @@ io.on('connection', (socket) => {
 });
 
 // get all channels
-app.get('/channels', auth, (req, res) => {
+app.get('/channels', (req, res) => {
     res.json(channels);
 });
 

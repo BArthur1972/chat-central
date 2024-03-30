@@ -62,25 +62,29 @@ function Signup() {
 
     async function handleSignup(e) {
         e.preventDefault();
-
-        const url = await uploadImage(image);
-
+    
         let newUser = {};
-
         if (bio === "") {
-            newUser = { name, email, password, picture: url, bio: "Hey there! I am using ChatCentral" };
+            if (image) {
+                const url = await uploadImage(image);
+                newUser = { name, email, password, picture: url, bio: "Hey there! I am using ChatCentral" };
+            } else {
+                newUser = { name, email, password, bio: "Hey there! I am using ChatCentral" };
+            }
         } else {
-            newUser = { name, email, password, picture: url, bio };
+            if (image) {
+                const url = await uploadImage(image);
+                newUser = { name, email, password, picture: url, bio };
+            } else {
+                newUser = { name, email, password, bio };
+            }
         }
-
+    
         signupUser(newUser).then((response) => {
             if (response && response.data) {
-                // save token to local storage
                 localStorage.setItem('token', response.data.token);
-
-                // Notify other users that there is a new user
-                socket.emit('new-user');
-
+    
+                socket.emit('new-user'); // Notify other users that there is a new user
                 navigate('/chat');
             }
         }).catch((err) => {
