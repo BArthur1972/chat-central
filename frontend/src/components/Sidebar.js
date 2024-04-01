@@ -23,13 +23,11 @@ function Sidebar() {
         if (isPublic) {
             setPrivateMemberMessage(null);
         }
-
-        // dispatch for notifications
-        dispatch(resetNotifications(channel));
+        dispatch(resetNotifications(channel)); // Reset the notifications for the channel when the user joins it
     }
 
     socket.off("notifications").on("notifications", (channel) => {
-        if (currentChannel !== channel) dispatch(addNotifications(channel));
+        if (currentChannel !== channel) dispatch(addNotifications(channel)); // Add a notification for the channel if the user is not currently in it
     });
 
     // get all channels
@@ -40,9 +38,9 @@ function Sidebar() {
         });
         socket.emit("join-channel", currentChannel);
         socket.emit("new-user");
-    }, [user, socket, currentChannel, setCurrentChannel, setChannels]);
+    }, [user, socket, currentChannel, setCurrentChannel, setChannels, getChannels]);
 
-    // useEffect hook to keep track of the current channel
+    // Keep track of the current channel
     useEffect(() => {
         socket.off("join-channel").on("join-channel", (newChannel) => {
             setCurrentChannel(newChannel);
