@@ -20,12 +20,10 @@ function Login() {
         loginUser({ email, password }).then((response) => {
             if (response && response.data) {
                 localStorage.setItem('token', response.data.token);
-    
+
                 socket.emit('new-user'); // Notify other users that a new user has joined
                 navigate('/chat');
-            }
-
-            else {
+            } else {
                 alert("Login Failed. Check your username and/or password.");
                 console.log(response.error);
             }

@@ -17,18 +17,13 @@ function Navigation() {
 		e.preventDefault();
 
 		await logoutUser(user);
-		
-		// Remove token from local storage
-		localStorage.removeItem('token');
-
-		// Go back to login page
+		localStorage.removeItem('token'); // Remove token from local storage
 		navigate("/login", { replace: true });
 	}
 
 	function goToAccountSettings(e) {
 		e.preventDefault();
 
-		// Go to account settings page
 		navigate('/account');
 	}
 
