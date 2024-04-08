@@ -3,19 +3,28 @@ import { Container, Nav, Navbar, NavDropdown, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import logo from '../assets/logo.png';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { useLogoutUserMutation } from '../services/appApi';
+import defaultProfilePic from '../assets/profile_placeholder.jpg';
+import './styles/Navigation.css';
 
 function Navigation() {
-	const user = useSelector((state) => state.user);
+	const navigate = useNavigate();
+	const { user } = useSelector((state) => state.user);
 	const [logoutUser] = useLogoutUserMutation();
 
 	async function handleLogout(e) {
 		e.preventDefault();
 
 		await logoutUser(user);
+		localStorage.removeItem('token'); // Remove token from local storage
+		navigate("/login", { replace: true });
+	}
 
-		// Go back to login page
-		window.location.replace("/");
+	function goToAccountSettings(e) {
+		e.preventDefault();
+
+		navigate('/account');
 	}
 
 	return (
@@ -40,19 +49,16 @@ function Navigation() {
 						{user && (
 							<NavDropdown title={
 								<>
-									{/* <img
-										src={user.picture}
+									{user.status === "online" ? <i className="fas fa-circle navigation-online-status"></i> : <i className="fas fa-circle navigation-offline-status"></i>}
+									<img
+										src={user.picture || defaultProfilePic}
 										alt=""
-										style={{ width: 30, height: 30, marginRight: 10, borderRadius: "50%", objectFit: "cover" }}
-									/> */}
+										className='user-profile-image'
+									/>
 									<span className="ms-2">{user.name}</span>
 								</>
 							} id="basic-nav-dropdown">
-								<NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-								<NavDropdown.Item href="#action/3.2">
-									Another action
-								</NavDropdown.Item>
-								<NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+								<NavDropdown.Item href="#action/3.1" onClick={goToAccountSettings}>My Account</NavDropdown.Item>
 								<NavDropdown.Divider />
 								<NavDropdown.Item href="#action/3.4">
 									<Button variant="danger" onClick={handleLogout}>Logout</Button>

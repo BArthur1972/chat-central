@@ -61,11 +61,6 @@
     margin: 0 auto;
 }
 
-.message-image {
-    margin: 10px;
-    max-width: 90%;
-}
-
 .selected-file-label {
     display: flex;
     justify-content: center;
@@ -75,4 +70,26 @@
 
 .selected-files-text {
     padding-top: 25px;
+
+.message-online-status {
+    color: green;
+}
+
+.message-offline-status {
+    color: #e3b505;
+}
+
+.message-offline-status,
+.message-online-status {
+    font-size: 11px;
+    position: relative;
+    z-index: 99;
+    top: 10px;
+    left: 10px;
+
+}
+
+.message-image {
+    margin: 10px;
+    max-width: 90%;
 }

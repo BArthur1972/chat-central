@@ -1,0 +1,11 @@
+.conversation-info {
+    padding: 0;
+    margin: 0 auto;
+    text-align: center;
+    height: 125px;
+}
+
+.conversation-info-items {
+    display: flex;
+    flex-direction: column;
+}

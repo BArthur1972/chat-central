@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Chat from './pages/Chat';
+import Account from './pages/Account';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useState } from 'react';
@@ -17,7 +18,7 @@ function App() {
 	const [privateMemberMessage, setPrivateMemberMessage] = useState([]);
 	const [newMessages, setNewMessages] = useState({});
 
-	const user = useSelector((state) => state.user);
+	const { user } = useSelector((state) => state.user);
 
 	return (
 		<AppContext.Provider value={{ socket, channels, setChannels, currentChannel, setCurrentChannel, members, setMembers, messages, setMessages, privateMemberMessage, setPrivateMemberMessage, newMessages, setNewMessages }}>
@@ -32,6 +33,7 @@ function App() {
 						</>
 					)}
 					<Route path="/chat" element={<Chat />} />
+					<Route path="/account" element={<Account/>} />
 				</Routes>
 			</BrowserRouter>
 		</AppContext.Provider>

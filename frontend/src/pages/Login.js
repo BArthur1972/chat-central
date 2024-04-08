@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import "./styles/Login.css";
 import { useLoginUserMutation } from "../services/appApi";
@@ -17,17 +17,15 @@ function Login() {
     async function handleLogin(e) {
         e.preventDefault();
 
-        // TODO: Login user
-        loginUser({ email, password }).then((data) => {
-            if (data && !data.error) {
-                socket.emit('new-user');
-                // navigate to chat page
-                navigate('/chat');
-            }
+        loginUser({ email, password }).then((response) => {
+            if (response && response.data) {
+                localStorage.setItem('token', response.data.token);
 
-            else {
+                socket.emit('new-user'); // Notify other users that a new user has joined
+                navigate('/chat');
+            } else {
                 alert("Login Failed. Check your username and/or password.");
-                console.log(data.error);
+                console.log(response.error);
             }
         });
     }
@@ -61,7 +59,7 @@ function Login() {
                             />
                         </Form.Group>
                         <Button variant="primary" type="submit">
-                            Login
+                            {isLoading ? <Spinner animation="grow" /> : "Login"}
                         </Button>
                         <div className="py-4">
                             <p className="text-center">
