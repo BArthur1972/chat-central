@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import { useState, useContext, useEffect, useRef } from 'react';
 import { AppContext } from '../context/appContext';
 import ChatLabel from './ChatLabel';
-import defaultProfilePic from '../assets/profile_placeholder.jpg';
 import './styles/MessageForm.css';
+import UserInfoModal from './UserInfoModal';
 
 function MessageForm() {
 	const { user } = useSelector((state) => state.user);
@@ -140,10 +140,10 @@ function MessageForm() {
 								<div className={sender?.email === user?.email ? "message" : "incoming-message"} key={msgIdx}>
 									<div className="message-inner">
 										<div className="d-flex align-items-center mb-3">
-											<img src={sender?.picture || defaultProfilePic} alt="" className="message-profile-image" />
+											<UserInfoModal userObject={sender} from={"MessageForm"} />
 											<p className="message-sender">{sender._id === user?._id ? "You" : sender.name}</p>
 										</div>
-										{fileUrl && <img src={fileUrl} alt="message" className="message-image" style={{maxWidth:"300px", maxHeight:"400px"}} />}
+										{fileUrl && <img src={fileUrl} alt="message" className="message-image" style={{ maxWidth: "300px", maxHeight: "400px" }} />}
 										<p className="message-content">{content}</p>
 										<p className="message-timestamp-left">{time}</p>
 									</div>
