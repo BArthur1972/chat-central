@@ -8,6 +8,20 @@
     margin-bottom: 10px;
 }
 
+.channels-section, .members-section {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.channels-section h3, .members-section h3{
+    margin-bottom: 10px;
+}
+
+#channelSearch, #memberSearch {
+    margin-bottom: 10px;
+}
+
 .image {
     width: 16%;
 }

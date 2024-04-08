@@ -23,10 +23,6 @@ function MessageForm() {
 	const { socket, currentChannel, setMessages, messages, privateMemberMessage } = useContext(AppContext);
 	const messageEndRef = useRef(null);
 
-	const [message, setMessage] = useState("");
-	const [showFileUploadBox, setShowFileUploadBox] = useState(false);
-	const [uploadingImage, setUploadingImage] = useState(false);
-
 	const startRecording = () => {
 		setRecordingAudio(true);
 		navigator.mediaDevices.getUserMedia({ audio: true })
@@ -101,43 +97,6 @@ function MessageForm() {
 		messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}
 
-	async function validateFile(e) {
-		const file = e.target.files[0];
-
-		// Check if image size is greater than 3mb
-		if (file.size > 3145728) {
-			return alert("Max file size is 3 MB");
-		} else {
-			setSelectedFile(file);
-		}
-	}
-
-	async function uploadImage() {
-		const data = new FormData();
-		data.append("file", selectedFile);
-		data.append("upload_preset", "chat_app_uploaded_file");
-
-		// Upload image to cloudinary api
-		try {
-			setUploadingImage(true);
-			const cloudinary_cloud_name = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
-			let res = await fetch(
-				`https://api.cloudinary.com/v1_1/${cloudinary_cloud_name}/upload`,
-				{
-					method: "post",
-					body: data,
-				}
-			);
-
-			const urlData = await res.json();
-			setUploadingImage(false);
-			return urlData.url;
-		} catch (e) {
-			setUploadingImage(false);
-			console.log(e);
-		}
-	}
-
 	function getTime() {
 		const today = new Date();
 		const minutes = today.getMinutes() < 10 ? "0" + today.getMinutes() : today.getMinutes();
@@ -170,8 +129,7 @@ function MessageForm() {
 		}
 
 		const time = getTime();
-		const date = getFormattedDate();
-
+		
 		const roomId = currentChannel;
 
 		if (selectedFiles.length === 0) { // Send message to the server without any files

@@ -1,16 +1,29 @@
-import React, { useContext, useEffect } from 'react';
-import { ListGroup, Col, Row } from 'react-bootstrap';
+import React, { useContext, useState, useEffect } from 'react';
+import { ListGroup, Form, Col, Row } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppContext } from '../context/appContext';
 import { addNotifications, resetNotifications } from '../features/userSlice';
 import './styles/Sidebar.css';
 import UserInfoModal from './UserInfoModal';
+import { useGetChannelsMutation } from '../services/appApi';
 
 function Sidebar() {
     const { user } = useSelector((state) => state.user);
     const dispatch = useDispatch();
     const { socket, setMembers, members, setCurrentChannel, setChannels, privateMemberMessage, channels, setPrivateMemberMessage, currentChannel } = useContext(AppContext);
     const [getChannels] = useGetChannelsMutation();
+    const [searchChannels, setSearchChannels] = useState('');
+    const [searchMembers, setSearchMembers] = useState('');
+
+    // Filter channels based on search input
+    const filteredChannels = channels.filter(channel =>
+        channel.toLowerCase().includes(searchChannels.toLowerCase())
+    );
+
+    // Filter members based on search input
+    const filteredMembers = members.filter(member =>
+        member.name.toLowerCase().includes(searchMembers.toLowerCase())
+    );
 
     function joinChannel(channel, isPublic = true) {
         if (!user) {
@@ -87,37 +100,57 @@ function Sidebar() {
     return (
         <>
             <h2 className="sidebar-header">Available Channels</h2>
-            <ListGroup>
-                {channels.map((channel, idx) => (
-                    <ListGroup.Item key={idx} onClick={() => joinChannel(channel)} active={channel === currentChannel} style={{ cursor: "pointer", display: "flex", justifyContent: "space-between" }}>
-                        {channel} {channel !== currentChannel && user.newMessages && user.newMessages[channel] && (<span className="badge rounded-pill bg-primary">{user.newMessages[channel]}</span>)}
-                    </ListGroup.Item>
-                ))}
-            </ListGroup>
-            <h2 className="sidebar-header">Members</h2>
-            <ListGroup>
-                {members.map((member, idx) => (
-                    <ListGroup.Item key={idx} style={{ cursor: "pointer" }} active={privateMemberMessage?._id === member?._id} onClick={() => handlePrivateMemberMessage(member)} disabled={member._id === user._id}>
-                        <Row>
-                            <Col xs={2} className="member-status">
-                                <div onClick={(e) => e.stopPropagation()}>
-                                    <UserInfoModal userObject={member} from={"Sidebar"} />
-                                </div>
-                                {member.status === "online" ? <i className="fas fa-circle sidebar-online-status"></i> : <i className="fas fa-circle sidebar-offline-status"></i>}
-                            </Col>
-                            <Col xs={9}>
-                                {member.name}
-                                {member._id === user?._id && " (You)"}
-                                {member.status === "offline" && " (Offline) Last Seen: " + calculateLastSeen(member.lastSeenDatetime)}
-                            </Col>
-                            <Col xs={1}>
-                                <span className="badge rounded-pill bg-primary">{user.newMessages && user.newMessages[orderIds(member._id, user._id)]}</span>
-                            </Col>
-                        </Row>
-                    </ListGroup.Item>
-                ))}
-            </ListGroup>
+            <div className='channels-section'>
+                <Form.Group controlId="channelSearch">
+                    <Form.Control
+                        type="text"
+                        placeholder="Search Channels"
+                        value={searchChannels}
+                        onChange={(e) => setSearchChannels(e.target.value)}
+                    />
+                </Form.Group>
+                <ListGroup>
+                    {filteredChannels.map((channel, idx) => (
+                        <ListGroup.Item key={idx} onClick={() => joinChannel(channel)} active={channel === currentChannel} style={{ cursor: "pointer", display: "flex", justifyContent: "space-between" }}>
+                            {channel} {channel !== currentChannel && user.newMessages && user.newMessages[channel] && (<span className="badge rounded-pill bg-primary">{user.newMessages[channel]}</span>)}
+                        </ListGroup.Item>
+                    ))}
+                </ListGroup>
+            </div>
 
+            <div className="members-section">
+                <h2 className="sidebar-header">Members</h2>
+                <Form.Group controlId="memberSearch">
+                    <Form.Control
+                        type="text"
+                        placeholder="Search Members"
+                        value={searchMembers}
+                        onChange={(e) => setSearchMembers(e.target.value)}
+                    />
+                </Form.Group>
+                <ListGroup>
+                    {filteredMembers.map((member, idx) => (
+                        <ListGroup.Item key={idx} style={{ cursor: "pointer" }} active={privateMemberMessage?._id === member?._id} onClick={() => handlePrivateMemberMessage(member)} disabled={member._id === user._id}>
+                            <Row>
+                                <Col xs={2} className="member-status">
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                        <UserInfoModal userObject={member} from={"Sidebar"} />
+                                    </div>
+                                    {member.status === "online" ? <i className="fas fa-circle sidebar-online-status"></i> : <i className="fas fa-circle sidebar-offline-status"></i>}
+                                </Col>
+                                <Col xs={9}>
+                                    {member.name}
+                                    {member._id === user?._id && " (You)"}
+                                    {member.status === "offline" && " (Offline) Last Seen: " + calculateLastSeen(member.lastSeenDatetime)}
+                                </Col>
+                                <Col xs={1}>
+                                    <span className="badge rounded-pill bg-primary">{user.newMessages && user.newMessages[orderIds(member._id, user._id)]}</span>
+                                </Col>
+                            </Row>
+                        </ListGroup.Item>
+                    ))}
+                </ListGroup>
+            </div>
         </>
     );
 }

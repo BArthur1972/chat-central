@@ -61,7 +61,7 @@ function FileUploadModal(props) {
                 <Modal.Body>
                     <Form onSubmit={handleSubmit}>
                         <Form.Group controlId="formBasicEmail">
-                            <Form.Label>Upload File (Max. 35MB)</Form.Label>
+                            <Form.Label>Upload File(s) (Max. 35MB each)</Form.Label>
                             <Form.Control
                                 type="file"
                                 onChange={validateFiles}
