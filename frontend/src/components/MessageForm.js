@@ -6,17 +6,85 @@ import { AppContext } from '../context/appContext';
 import ChatLabel from './ChatLabel';
 import './styles/MessageForm.css';
 import UserInfoModal from './UserInfoModal';
+import FileUploadModal from './FileUploadModal';
+
+// MediaRecorder API for recording audio
+let mediaRecorder;
 
 function MessageForm() {
-	const { user } = useSelector((state) => state.user);
+	const [message, setMessage] = useState("");
+	const [selectedFiles, setSelectedFiles] = useState([]);
+	const [uploadingFile, setUploadingFile] = useState(false);
+	const [recordingAudio, setRecordingAudio] = useState(false);
+	const [audioBlob, setAudioBlob] = useState(null);
+
+	const user = useSelector((state) => state.user);
+  
 	const { socket, currentChannel, setMessages, messages, privateMemberMessage } = useContext(AppContext);
 	const messageEndRef = useRef(null);
 
 	const [message, setMessage] = useState("");
-	const [selectedFile, setSelectedFile] = useState(null);
 	const [showFileUploadBox, setShowFileUploadBox] = useState(false);
 	const [uploadingImage, setUploadingImage] = useState(false);
 
+	const startRecording = () => {
+		setRecordingAudio(true);
+		navigator.mediaDevices.getUserMedia({ audio: true })
+			.then(stream => {
+				mediaRecorder = new MediaRecorder(stream);
+				mediaRecorder.start();
+
+				mediaRecorder.addEventListener("start", () => {
+					console.log("Recording started, mediaRecorder state: ", mediaRecorder.state);
+				});
+
+				const audioChunks = [];
+				mediaRecorder.addEventListener("dataavailable", event => {
+					audioChunks.push(event.data);
+				});
+
+				mediaRecorder.addEventListener("stop", () => {
+					console.log("Recording stopped, mediaRecorder state: ", mediaRecorder.state);
+					const audioBlob = new Blob(audioChunks, { type: "audio/wav" }); // Convert the audio chunks to a blob
+					setAudioBlob(audioBlob);
+					setSelectedFiles(prevSelectedFiles => [...prevSelectedFiles, audioBlob]); // Add the audio blob to the selected files array
+					stream.getTracks().forEach(track => track.stop()); // Stop the audio stream after recording
+				});
+			});
+	}
+
+	const stopRecording = () => {
+		mediaRecorder.stop();
+		setRecordingAudio(false);
+		setAudioBlob(null);
+	}
+
+	async function uploadFiles() {
+		const uploadPromises = selectedFiles.map(file => {
+			const data = new FormData();
+			data.append("file", file);
+			data.append("upload_preset", "chat_app_uploaded_file");
+
+			// Upload file to cloudinary using the cloudinary API
+			const cloudinary_cloud_name = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
+			return fetch(
+				`https://api.cloudinary.com/v1_1/${cloudinary_cloud_name}/upload`,
+				{
+					method: "post",
+					body: data,
+				}).then(res => res.json());
+		});
+
+		try {
+			setUploadingFile(true);
+			const results = await Promise.all(uploadPromises);
+			setUploadingFile(false);
+			return results.map(result => result.url);
+		} catch (e) {
+			setUploadingFile(false);
+			console.log(e);
+		}
+	}
 	// Listen for messages from the server and update the state with the new messages
 	useEffect(() => {
 		socket.off('channel-messages').on('channel-messages', (channelMessages) => {
@@ -91,10 +159,13 @@ function MessageForm() {
 		return month + "/" + day + "/" + year;
 	}
 
+	const todayDate = getFormattedDate();
+
 	async function handleSubmit(e) {
 		e.preventDefault();
 
-		if (!message && !selectedFile) {
+		// Check if the message and selectedFile is empty, so we don't send empty messages to the server
+		if (!message && selectedFiles.length === 0) {
 			return;
 		}
 
@@ -103,26 +174,43 @@ function MessageForm() {
 
 		const roomId = currentChannel;
 
-		if (!selectedFile) { // Send message to the server without image
-			socket.emit("message-channel", roomId, message, user, time, date);
+		if (selectedFiles.length === 0) { // Send message to the server without any files
+			socket.emit("message-channel", roomId, message, user, time, todayDate);
 
-		} else { // Send message to the server with image		
-			const imageUrl = await uploadImage();
-			console.log("Image url: ", imageUrl);
-			socket.emit("message-channel-image", roomId, message, user, time, date, imageUrl);
+		} else if (message && selectedFiles.length > 1) { // Send message to the server with multiple files first then send the message
+			// Send the message to the server first
+			socket.emit("message-channel", roomId, message, user, time, todayDate);
+			const fileUrls = await uploadFiles();
+			// Then send the files
+			fileUrls.forEach(fileUrl => {
+				socket.emit("message-channel-file", roomId, "", user, time, todayDate, fileUrl);
+				console.log("File url: ", fileUrl);
+			});
+		} else { // If its a single file, send the message to the server with the file
+			const fileUrls = await uploadFiles();
+			fileUrls.forEach(fileUrl => {
+				socket.emit("message-channel-file", roomId, message, user, time, todayDate, fileUrl);
+				console.log("File url: ", fileUrl);
+			});
 		}
 
 		setMessage("");
-		setSelectedFile(null);
-		setShowFileUploadBox(false);
+		setSelectedFiles([]);
 	}
 
-	const toggleMediaUploadBox = () => {
-		if (showFileUploadBox) {
-			setShowFileUploadBox(false);
-		} else {
-			setShowFileUploadBox(true);
-		}
+	// Check if the file url is an image file
+	function isImage(url) {
+		return url.match(/\.(jpeg|jpg|gif|png)$/) != null;
+	}
+
+	// Check if the file url is an audio file
+	function isAudio(url) {
+		return url.match(/\.(mp3|wav|webm)$/) != null;
+	}
+
+	// Check if the file url is a video file
+	function isVideo(url) {
+		return url.match(/\.(mp4|avi|mov)$/) != null;
 	}
 
 	return (
@@ -143,7 +231,13 @@ function MessageForm() {
 											<UserInfoModal userObject={sender} from={"MessageForm"} />
 											<p className="message-sender">{sender._id === user?._id ? "You" : sender.name}</p>
 										</div>
-										{fileUrl && <img src={fileUrl} alt="message" className="message-image" style={{ maxWidth: "300px", maxHeight: "400px" }} />}
+										{fileUrl &&
+											<>
+												{isImage(fileUrl) && <img src={fileUrl} style={{ maxHeight: "300px", maxWidth: "400px" }} alt="message" className="message-image" />}
+												{isAudio(fileUrl) && <audio className='message-audio' controls><source src={fileUrl} /></audio>}
+												{isVideo(fileUrl) && <video className='message-video' style={{ maxHeight: "300px", maxWidth: "400px" }} controls><source src={fileUrl} /></video>}
+											</>
+										}
 										<p className="message-content">{content}</p>
 										<p className="message-timestamp-left">{time}</p>
 									</div>
@@ -153,12 +247,17 @@ function MessageForm() {
 					))}
 				<div ref={messageEndRef} />
 			</div>
+			{selectedFiles.length > 0 &&
+				(<div className='selected-file-label'>
+					<p className='selected-files-text'>Selected file(s): {selectedFiles.map(file => file.name).join(', ') || "Recorded " + selectedFiles[0].type + " file"}</p>
+					<Button variant='danger' className='clear-selected-files-btn' onClick={() => setSelectedFiles([])} disabled={selectedFiles.length === 0}>Clear</Button>
+				</div>)}
 			<div className="input">
 				<Form onSubmit={handleSubmit} className='form'>
 					<Row className='input-box'>
 						<Col md={10}>
 							<Form.Group>
-								<Form.Control type="text" placeholder="Your message" disabled={!user} value={message} onChange={(e) => setMessage(e.target.value)}></Form.Control>
+								<Form.Control id='text-box' type="text" placeholder="Your message" disabled={!user} value={message} onChange={(e) => setMessage(e.target.value)}></Form.Control>
 							</Form.Group>
 						</Col>
 						<Col md={1}>
@@ -168,12 +267,10 @@ function MessageForm() {
 						</Col>
 					</Row>
 				</Form>
-				<Button className="toggleMediaUploadBtn" variant="primary" type="submit" onClick={toggleMediaUploadBox} style={{ backgroundColor: "grey" }} disabled={!user}> <i className="fas fa-photo-film"></i></Button>
-				{showFileUploadBox && <Row className='media-upload'>
-					<Col>
-						<input type="file" disabled={!user} accept='image/png, image/jpeg' onChange={validateFile}></input>
-					</Col>
-				</Row>}
+				<Button disabled={!user}><i onClick={startRecording} className={recordingAudio ? "fa-solid fa-microphone-lines fa-fade" : "fa-solid fa-microphone-lines"}></i></Button>
+				{recordingAudio &&
+					<Button onClick={stopRecording} style={{ backgroundColor: "red" }} disabled={!user}><i className="fa-solid fa-close"></i></Button>}
+				<FileUploadModal selectedMedia={selectedFiles} setSelectedMedia={setSelectedFiles} />
 			</div>
 		</>
 	);

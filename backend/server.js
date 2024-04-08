@@ -103,6 +103,18 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('notifications', channel);
     });
 
+    // Post new message with file
+    socket.on('message-channel-file', async (channel, content, sender, time, date, fileUrl) => {
+        const newMessage = await Message.create({ content, from: sender, time, date, to: channel, fileUrl });
+        let channelMessages = await getLastMessagesFromChannel(channel);
+        channelMessages = sortChannelMessagesByDate(channelMessages);
+        // sending a message to a channel
+        io.to(channel).emit('channel-messages', channelMessages);
+
+        // sending a notification to a channel
+        socket.broadcast.emit('notifications', channel);
+    });
+
     // Log a user out of the app
     app.delete('/logout', auth, async (req, res) => {
         try {

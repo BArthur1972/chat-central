@@ -61,6 +61,16 @@
     margin: 0 auto;
 }
 
+.selected-file-label {
+    display: flex;
+    justify-content: center;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+}
+
+.selected-files-text {
+    padding-top: 25px;
+
 .message-online-status {
     color: green;
 }
