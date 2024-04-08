@@ -7,9 +7,10 @@ import './styles/Sidebar.css';
 import UserInfoModal from './UserInfoModal';
 
 function Sidebar() {
-    const user = useSelector((state) => state.user);
+    const { user } = useSelector((state) => state.user);
     const dispatch = useDispatch();
     const { socket, setMembers, members, setCurrentChannel, setChannels, privateMemberMessage, channels, setPrivateMemberMessage, currentChannel } = useContext(AppContext);
+    const [getChannels] = useGetChannelsMutation();
 
     function joinChannel(channel, isPublic = true) {
         if (!user) {
@@ -21,26 +22,24 @@ function Sidebar() {
         if (isPublic) {
             setPrivateMemberMessage(null);
         }
-
-        // dispatch for notifications
-        dispatch(resetNotifications(channel));
+        dispatch(resetNotifications(channel)); // Reset the notifications for the channel when the user joins it
     }
 
     socket.off("notifications").on("notifications", (channel) => {
-        if (currentChannel !== channel) dispatch(addNotifications(channel));
+        if (currentChannel !== channel) dispatch(addNotifications(channel)); // Add a notification for the channel if the user is not currently in it
     });
 
     // get all channels
     useEffect(() => {
         setCurrentChannel(currentChannel);
-        fetch("http://localhost:5001/channels")
-            .then((res) => res.json())
-            .then((data) => setChannels(data));
+        getChannels().then((res) => {
+            setChannels(res.data);
+        });
         socket.emit("join-channel", currentChannel);
         socket.emit("new-user");
-    }, [user, socket, currentChannel, setCurrentChannel, setChannels]);
+    }, [user, socket, currentChannel, setCurrentChannel, setChannels, getChannels]);
 
-    // useEffect hook to keep track of the current channel
+    // Keep track of the current channel
     useEffect(() => {
         socket.off("join-channel").on("join-channel", (newChannel) => {
             setCurrentChannel(newChannel);
@@ -91,7 +90,7 @@ function Sidebar() {
             <ListGroup>
                 {channels.map((channel, idx) => (
                     <ListGroup.Item key={idx} onClick={() => joinChannel(channel)} active={channel === currentChannel} style={{ cursor: "pointer", display: "flex", justifyContent: "space-between" }}>
-                        {channel} {channel !== currentChannel && (<span className="badge rounded-pill bg-primary">{user.newMessages[channel]}</span>)}
+                        {channel} {channel !== currentChannel && user.newMessages && user.newMessages[channel] && (<span className="badge rounded-pill bg-primary">{user.newMessages[channel]}</span>)}
                     </ListGroup.Item>
                 ))}
             </ListGroup>
@@ -112,7 +111,7 @@ function Sidebar() {
                                 {member.status === "offline" && " (Offline) Last Seen: " + calculateLastSeen(member.lastSeenDatetime)}
                             </Col>
                             <Col xs={1}>
-                                <span className="badge rounded-pill bg-primary">{user.newMessages[orderIds(member._id, user._id)]}</span>
+                                <span className="badge rounded-pill bg-primary">{user.newMessages && user.newMessages[orderIds(member._id, user._id)]}</span>
                             </Col>
                         </Row>
                     </ListGroup.Item>

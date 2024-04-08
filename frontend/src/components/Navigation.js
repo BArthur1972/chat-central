@@ -10,22 +10,20 @@ import './styles/Navigation.css';
 
 function Navigation() {
 	const navigate = useNavigate();
-	const user = useSelector((state) => state.user);
+	const { user } = useSelector((state) => state.user);
 	const [logoutUser] = useLogoutUserMutation();
 
 	async function handleLogout(e) {
 		e.preventDefault();
 
 		await logoutUser(user);
-
-		// Go back to login page
+		localStorage.removeItem('token'); // Remove token from local storage
 		navigate("/login", { replace: true });
 	}
 
 	function goToAccountSettings(e) {
 		e.preventDefault();
 
-		// Go to account settings page
 		navigate('/account');
 	}
 

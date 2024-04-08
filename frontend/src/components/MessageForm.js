@@ -8,7 +8,7 @@ import './styles/MessageForm.css';
 import UserInfoModal from './UserInfoModal';
 
 function MessageForm() {
-	const user = useSelector((state) => state.user);
+	const { user } = useSelector((state) => state.user);
 	const { socket, currentChannel, setMessages, messages, privateMemberMessage } = useContext(AppContext);
 	const messageEndRef = useRef(null);
 

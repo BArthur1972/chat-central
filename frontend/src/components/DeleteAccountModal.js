@@ -8,7 +8,7 @@ import { useDeleteAccountMutation } from '../services/appApi';
 import React from 'react'
 
 function DeleteAccountModal() {
-    const user = useSelector((state) => state.user);
+    const { user } = useSelector((state) => state.user);
     const [show, setShow] = useState(false);
     const [deleteAccount] = useDeleteAccountMutation();
     const navigate = useNavigate();

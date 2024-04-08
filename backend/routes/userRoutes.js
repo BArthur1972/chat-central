@@ -1,9 +1,10 @@
 const router = require('express').Router();
 const User = require('../models/User');
 const Message = require('../models/Message');
+const auth = require('../middleware/auth');
 
 // Get user by id
-router.get('/getUserById/:id', async (req, res) => {
+router.get('/getUserById/:id', auth, async (req, res) => {
     const id = req.params.id;
     try {
         const user = await User.findById(id);
@@ -18,8 +19,12 @@ router.get('/getUserById/:id', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const { name, email, password, picture, bio } = req.body;
-        const user = await User.create({ name, email, password, picture, dateJoined: Date.now() , bio});
-        res.status(201).json(user);
+        const user = new User({ name, email, password, picture, dateJoined: Date.now(), bio });
+
+        const token = await user.generateAuthToken();
+        await user.save();
+
+        res.status(201).json({ user, token });
     } catch (e) {
         let msg;
         if (e.code == 11000) {
@@ -37,16 +42,18 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findByCredentials(email, password);
+        
+        const token = await user.generateAuthToken();
         user.status = 'online';
         await user.save();
-        res.status(200).json(user);
+        res.status(200).json({user, token});
     } catch (e) {
         res.status(400).json(e.message);
     }
 });
 
 // Update the username
-router.put('/updateUsername/:id/:newName', async (req, res) => {
+router.put('/updateUsername/:id/:newName', auth, async (req, res) => {
     const { id, newName } = req.params;
     try {
         const user = await User.findByIdAndUpdate(id, { name: newName }, { new: true });
@@ -59,7 +66,7 @@ router.put('/updateUsername/:id/:newName', async (req, res) => {
 });
 
 // Update password
-router.put('/updatePassword/:id/:newPassword', async (req, res) => {
+router.put('/updatePassword/:id/:newPassword', auth, async (req, res) => {
     const { id, newPassword } = req.params;
     try {
         const user = await User.findById(id);
@@ -74,7 +81,7 @@ router.put('/updatePassword/:id/:newPassword', async (req, res) => {
 });
 
 // Update bio
-router.put('/updateBio/:id/:newBio', async (req, res) => {
+router.put('/updateBio/:id/:newBio', auth, async (req, res) => {
     const { id, newBio } = req.params;
     try {
         const user = await User.findByIdAndUpdate(id, { bio: newBio }, { new: true });
@@ -87,7 +94,7 @@ router.put('/updateBio/:id/:newBio', async (req, res) => {
 });
 
 // Update picture
-router.put('/updatePicture/:id/:newPicture', async (req, res) => {
+router.put('/updatePicture/:id/:newPicture', auth, async (req, res) => {
     const { id, newPicture } = req.params;
     try {
         const user = await User.findByIdAndUpdate(id, { picture: newPicture }, { new: true });
@@ -99,7 +106,7 @@ router.put('/updatePicture/:id/:newPicture', async (req, res) => {
 });
 
 // Delete account
-router.delete('/deleteAccount/:id', async (req, res) => {
+router.delete('/deleteAccount/:id', auth, async (req, res) => {
     const id = req.params.id;
     try {
         const user = await User.findByIdAndDelete(id);

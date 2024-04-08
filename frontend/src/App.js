@@ -18,7 +18,7 @@ function App() {
 	const [privateMemberMessage, setPrivateMemberMessage] = useState([]);
 	const [newMessages, setNewMessages] = useState({});
 
-	const user = useSelector((state) => state.user);
+	const { user } = useSelector((state) => state.user);
 
 	return (
 		<AppContext.Provider value={{ socket, channels, setChannels, currentChannel, setCurrentChannel, members, setMembers, messages, setMessages, privateMemberMessage, setPrivateMemberMessage, newMessages, setNewMessages }}>

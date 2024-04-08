@@ -9,7 +9,7 @@ import DeleteAccountModal from '../components/DeleteAccountModal';
 import ChangeProfilePictureModal from '../components/ChangeProfilePictureModal';
 
 function Account() {
-    const user = useSelector((state) => state.user);
+    const { user } = useSelector((state) => state.user);
 
     function getFormattedDateJoined(date) {
         const lastSeenDate = new Date(date);

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Container, Row, Col, Form, Button, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import './styles/Signup.css';
 import { useSignupUserMutation } from "../services/appApi";
 import { useNavigate } from 'react-router-dom';
 import defaultProfilePic from "../assets/profile_placeholder.jpg";
+import { AppContext } from '../context/appContext';
 
 function Signup() {
     // States for storing user data
@@ -14,6 +15,7 @@ function Signup() {
     const [bio, setBio] = useState("");
     const [signupUser, { isLoading, error }] = useSignupUserMutation();
     const navigate = useNavigate();
+    const { socket } = useContext(AppContext);
 
     // States for uploading and setting profile images
     const [image, setImage] = useState(null);
@@ -60,20 +62,29 @@ function Signup() {
 
     async function handleSignup(e) {
         e.preventDefault();
-
-        const url = await uploadImage(image);
-
+    
         let newUser = {};
-
         if (bio === "") {
-            newUser = { name, email, password, picture: url, bio: "Hey there! I am using ChatCentral" };
+            if (image) {
+                const url = await uploadImage(image);
+                newUser = { name, email, password, picture: url, bio: "Hey there! I am using ChatCentral" };
+            } else {
+                newUser = { name, email, password, bio: "Hey there! I am using ChatCentral" };
+            }
         } else {
-            newUser = { name, email, password, picture: url, bio };
+            if (image) {
+                const url = await uploadImage(image);
+                newUser = { name, email, password, picture: url, bio };
+            } else {
+                newUser = { name, email, password, bio };
+            }
         }
-
-        signupUser(newUser).then((data) => {
-            if (data) {
-                console.log(data);
+    
+        signupUser(newUser).then((response) => {
+            if (response && response.data) {
+                localStorage.setItem('token', response.data.token);
+    
+                socket.emit('new-user'); // Notify other users that there is a new user
                 navigate('/chat');
             }
         }).catch((err) => {
